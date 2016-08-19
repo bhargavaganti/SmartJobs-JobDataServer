@@ -1,5 +1,10 @@
-# database path and files
-data/**/
+# node files
+node_modules/
 
 # atom files
 .jshintrc
+
+# database path and files
+save_folder/
+data/db/
+data/demand/

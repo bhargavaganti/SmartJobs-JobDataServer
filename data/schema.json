@@ -1,0 +1,84 @@
+[
+    {
+        "name": "JobPostings",
+        "fields": [
+            { "name": "uri", "type": "string", "store": "cache", "primary": true },
+            { "name": "url", "type": "string", "null": true },
+            { "name": "name", "type": "string", "null": true },
+            { "name": "date", "type": "datetime", "null": true },
+    		{ "name": "dateFullStr", "type": "string", "null": true },
+            { "name": "datePartStr", "type": "string", "null": true },
+    		{ "name": "hiringOrganization", "type": "string", "null": true },
+    		{ "name": "jobTitle", "type": "string", "null": true },
+    		{ "name": "description", "type": "string", "null": true }
+    	],
+    	"joins": [
+    	    { "name": "inLocation", "type": "field", "store": "Locations", "inverse": "foundJobs" },
+            { "name": "inCountry", "type": "field", "store": "Countries", "inverse": "foundJobs" },
+            { "name": "requiredSkills", "type": "index", "store": "Skills", "inverse": "requiredForJobs" },
+            { "name": "foundIn", "type": "field", "store": "Sources", "inverse": "found" }
+    	],
+    	"keys": [
+    	    { "field": "name", "type": "text" },
+    	    { "field": "hiringOrganization", "type": "text" },
+    	    { "field": "jobTitle", "type": "text" },
+    	    { "field": "description", "type": "text" },
+    	    { "field": "dateFullStr", "type": "text" },
+            { "field": "datePartStr", "type": "text" }
+    	]
+    },
+    {
+        "name": "Skills",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "name", "type": "string", "null": true },
+            { "name": "type", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "requiredForJobs", "type": "index", "store": "JobPostings", "inverse": "requiredSkills" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "Locations",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "lat", "type": "float", "null": true },
+            { "name": "long", "type": "float", "null": true },
+            { "name": "name", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "foundJobs", "type": "index", "store": "JobPostings", "inverse": "inLocation" },
+            { "name": "inCountry", "type": "field", "store": "Countries", "inverse": "hasLocations" }
+        ],
+        "keys": [
+            { "field": "uri", "type": "text" },
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "Countries",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "name", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "foundJobs", "type": "index", "store": "JobPostings", "inverse": "inCountry" },
+            { "name": "hasLocations", "type": "index", "store": "Locations", "inverse": "inCountry" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "Sources",
+        "fields": [
+            { "name": "name", "type": "string", "store": "cache", "primary": true }
+        ],
+        "joins": [
+            { "name": "found", "type": "index", "store": "JobPostings", "inverse": "foundIn" }
+        ]
+    }
+]
