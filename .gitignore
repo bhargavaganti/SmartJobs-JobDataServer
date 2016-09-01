@@ -5,6 +5,12 @@ node_modules/
 .jshintrc
 
 # database path and files
-save_folder/
+CIKM/
 data/db/
 data/demand/
+
+# log files
+log/*.log
+
+# post format
+postJsonFormat.json

@@ -5,7 +5,7 @@
             { "name": "uri", "type": "string", "store": "cache", "primary": true },
             { "name": "url", "type": "string", "null": true },
             { "name": "name", "type": "string", "null": true },
-            { "name": "date", "type": "datetime", "null": true },
+            { "name": "date", "type": "datetime" },
     		{ "name": "dateFullStr", "type": "string", "null": true },
             { "name": "datePartStr", "type": "string", "null": true },
     		{ "name": "hiringOrganization", "type": "string", "null": true },
@@ -16,7 +16,8 @@
     	    { "name": "inLocation", "type": "field", "store": "Locations", "inverse": "foundJobs" },
             { "name": "inCountry", "type": "field", "store": "Countries", "inverse": "foundJobs" },
             { "name": "requiredSkills", "type": "index", "store": "Skills", "inverse": "requiredForJobs" },
-            { "name": "foundIn", "type": "field", "store": "Sources", "inverse": "found" }
+            { "name": "foundIn", "type": "field", "store": "Sources", "inverse": "found" },
+            { "name": "wikified", "type": "index", "store": "Concepts", "inverse": "foundForJobs" }
     	],
     	"keys": [
     	    { "field": "name", "type": "text" },
@@ -42,11 +43,22 @@
         ]
     },
     {
+        "name": "Concepts",
+        "fields": [
+            { "name": "name", "type": "string", "primary": true }
+        ],
+        "joins": [
+            { "name": "foundForJobs", "type": "index", "store": "JobPostings", "inverse": "wikified" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
         "name": "Locations",
         "fields": [
             { "name": "uri", "type": "string", "primary": true },
-            { "name": "lat", "type": "float", "null": true },
-            { "name": "long", "type": "float", "null": true },
+            { "name": "coord", "type": "float_pair", "null": true },
             { "name": "name", "type": "string", "null": true }
         ],
         "joins": [

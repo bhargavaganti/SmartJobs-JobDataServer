@@ -1,0 +1,76 @@
+Welcome to the JobAnalytics Dataserver!
+
+Possible methods:
+
+POST /api/v1/jobs                           // POSTs the records to the bases
+GET  /api/v1/jobs                           // GETs the jobs info (required query)
+GET  /api/v1/jobs/{id}                      // GETs the job with 'id' info
+
+GET /api/v1/jobs/locations                  // GETs the jobs locations info (required query)
+GET /api/v1/jobs/{id}/locations             // GETs the jobs with 'id' locations info
+
+GET /api/v1/jobs/skills                     // GETs the jobs skills info (required query)
+GET /api/v1/jobs/{id}/skills                // GETs the jobs with 'id' skills info
+
+GET /api/v1/jobs/locations_and_skills       // GETs the jobs location and skill info (required query)
+GET /api/v1/jobs/{id}/locations_and_skills  // GETs the job with 'id' location and skill info
+
+GET /api/v1/stats/count                     // GETs the number count of jobs, skills and locations
+GET /api/v1/stats/lists                     // GETs the whole arrays of skills, locations and countries with occurrences
+GET /api/v1/stats/lists/{length}            // GETs the top 'length' arrays of skills, locations and countries with occurrences
+
+
+To query please use the following data structure:
+var query = {
+    skills:    ['javascript', 'nodejs'],      // array of skills
+    countries: ['Denmark', 'United Kingdom'], // array of countries
+    locations: ['London', 'Berlin']           // array of locations/cities
+}
+
+or in url:
+/api/v1/jobs?skills=javascript&skills=nodejs&countries=Denmark
+
+For posting to the database, use the JSON structure:
+{
+    "uri": "string",
+    "url": "string",
+    "name": "string",
+    "date": "datetime",
+    "dateFullStr": "string",
+    "datePartStr": "string",
+    "hiringOrganization": "string",
+    "jobTitle": "string",
+    "description": "string",
+    "inLocation": {
+        "uri": "string",
+        "coord": [
+            "location longitude",
+            "location latitude"
+        ],
+        "name": "string",
+        "inCountry": {
+            "uri": "string",
+            "name": "string"
+        }
+    },
+    "inCountry": {
+        "uri": "string",
+        "name": "string"
+    },
+    "foundIn": {
+        "name": "string"
+    },
+    "requiredSkills": [
+        {
+            "uri": "string",
+            "name": "string",
+        }
+    ],
+    "wikified": [
+        {
+            "name": "string"
+        }
+    ]
+}
+
+Copyright (c) 2016 Copyright Holder All Rights Reserved.

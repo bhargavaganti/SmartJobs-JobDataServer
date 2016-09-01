@@ -4,7 +4,10 @@
   "description": "The database server for jobanalysis website developed for the EDSA project.",
   "main": "server.js",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "file-stream-rotator": "0.0.7",
+    "morgan": "^1.7.0",
     "qminer": "^6.2.0"
   },
   "devDependencies": {},
@@ -21,12 +24,15 @@
     "API"
   ],
   "author": [
-      "Inna Novalija <inna.novalija@ijs.si>",
-      "Erik Novak <erik.novak@ijs.si>"
+    "Inna Novalija <inna.novalija@ijs.si>",
+    "Erik Novak <erik.novak@ijs.si>"
   ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ErikNovak/jobanalysis-dataserver/issues"
   },
-  "homepage": "https://github.com/ErikNovak/jobanalysis-dataserver#readme"
+  "homepage": "https://github.com/ErikNovak/jobanalysis-dataserver#readme",
+  "config": {
+    "port": 2510
+  }
 }
