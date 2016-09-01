@@ -1,4 +1,8 @@
-Welcome to the JobAnalytics Dataserver!
+Welcome to the JSI Jobs Web API!
+
+The web API allows the user to query for Data Science Jobs, that have been found using the
+Adzuna API and were stored using the QMiner data analytics platform. It contains only the
+Job Posts containing the Data Science (predefined) skillset that were published in the EU.
 
 Possible methods:
 
@@ -72,5 +76,10 @@ For posting to the database, use the JSON structure:
         }
     ]
 }
+
+Possible improvements:
+ - Using joobles.org to crawl for more jobs published in the EU
+ - Additional GET, POST routes
+
 
 Copyright (c) 2016 Copyright Holder All Rights Reserved.

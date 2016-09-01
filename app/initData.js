@@ -1,6 +1,40 @@
 // dependancy on format (requires EU countries)
 var format = require('./format');
+var winston = require('winston');
+var path = require('path');
+var fs = require('fs');
 
+// file rotation for winston
+winston.transports.DailyRotateFile = require('winston-daily-rotate-file');
+
+// setup info streams
+var updateDirectory = path.join(__dirname, '..', 'log', 'initial', 'update');
+if(!fs.existsSync(updateDirectory)) {
+    fs.mkdirSync(updateDirectory);
+}
+var errorDirectory = path.join(__dirname, '..', 'log', 'initial', 'error');
+if(!fs.existsSync(errorDirectory)) {
+    fs.mkdirSync(errorDirectory);
+}
+
+var logger = new (winston.Logger)({
+    transports: [
+        new (winston.transports.DailyRotateFile)({
+            name: 'loading-file',
+            filename: updateDirectory + '/update.log',
+            level: 'info',
+            datePattern: '.yyyy-MM-dd',
+            prepend: false
+        }),
+        new (winston.transports.DailyRotateFile)({
+            name: 'error-file',
+            filename: errorDirectory + '/error.log',
+            level: 'error',
+            datePattern: '.yyyy-MM-dd',
+            prepend: false
+        })
+    ]
+});
 
 function InitData(_base) {
 
@@ -24,28 +58,32 @@ function InitData(_base) {
      * @return {Object} Self.
      */
     this.update = function(records, sortF) {
-        var sort = sortF === undefined ? false : sortF;
-        if (records instanceof Array) {
-            records.forEach(function(rec) {
-                updateInitArray(locations, rec.inLocation, sort);
-                updateInitArray(countries, rec.inCountry, sort);
-                updateInitArray(skills, rec.requiredSkills, sort);
-                updateTimeSeriesArray(skills, rec, sort);
-            });
-        } else if (records instanceof Object) {
-            updateInitArray(locations, records.inLocation, sort);
-            updateInitArray(countries, records.inCountry, sort);
-            updateInitArray(skills, records.requiredSkills, sort);
-            updateTimeSeriesArray(skills, records, sort);
-        } else {
-            throw "InitData.update: Records must be an array of Objects or an Object";
+        try {
+            var sort = sortF === undefined ? false : sortF;
+            if (records instanceof Array) {
+                records.forEach(function(rec) {
+                    updateInitArray(locations, rec.inLocation, sort);
+                    updateInitArray(countries, rec.inCountry, sort);
+                    updateInitArray(skills, rec.requiredSkills, sort);
+                    updateTimeSeriesArray(skills, rec, sort);
+                });
+            } else if (records instanceof Object) {
+                updateInitArray(locations, records.inLocation, sort);
+                updateInitArray(countries, records.inCountry, sort);
+                updateInitArray(skills, records.requiredSkills, sort);
+                updateTimeSeriesArray(skills, records, sort);
+            } else {
+                throw "InitData.update: Records must be an array of Objects or an Object";
+            }
+            // update the initial statistics
+            numOfJobs += records.length;
+            numOfLocations = locations.length;
+            numOfSkills = skills.length;
+            logger.info("Initialized data updated");
+            return self;
+        } catch (err) {
+            logger.error("Error with updating data", { err_message: err, data: records });
         }
-        // update the initial statistics
-        numOfJobs += records.length;
-        numOfLocations = locations.length;
-        numOfSkills = skills.length;
-
-        return self;
     };
 
     /////////////////////////
@@ -143,6 +181,7 @@ function InitData(_base) {
             };
             return skillPair;
         });
+        logger.info("Initialized skills");
         return topSkills;
     }
 
@@ -174,6 +213,7 @@ function InitData(_base) {
                 });
             }
         }
+        logger.info("Initialized locations");
         return topLocations;
     }
 
@@ -198,6 +238,7 @@ function InitData(_base) {
             };
             return countryPair;
         });
+        logger.info("Initialized countries");
         return topCountries;
     }
 
@@ -266,6 +307,7 @@ function InitData(_base) {
                 }
             });
         });
+        logger.info("Initialized timeseries");
         return timeSeries;
     }
 

@@ -10,7 +10,4 @@ data/db/
 data/demand/
 
 # log files
-log/*.log
-
-# post format
-postJsonFormat.json
+log/**/*.log*

@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var FileStreamRotator = require('file-stream-rotator');
 var morgan = require('morgan');
+var winston = require('winston');
 var fs = require('fs');
 
 
@@ -17,17 +18,49 @@ app.use(bodyParser.urlencoded({
 }));
 
 // setup logger
-var logDirectory = path.join(__dirname, 'log');
-if(!fs.existsSync(logDirectory)) {
-    fs.mkdirSync(logDirectory);
+var accessDirectory = path.join(__dirname, 'log', 'access');
+if(!fs.existsSync(accessDirectory)) {
+    fs.mkdirSync(accessDirectory);
 }
 var accessLogStream = FileStreamRotator.getStream({
     date_format: 'YYYY-MM-DD',
-    filename: path.join(logDirectory, 'access-%DATE%.log'),
+    filename: path.join(accessDirectory, 'access-%DATE%.log'),
     frequency: 'daily',
     verbose: false
 });
 app.use(morgan('short', { stream: accessLogStream }));
+
+// file rotation for winston
+winston.transports.DailyRotateFile = require('winston-daily-rotate-file');
+
+// setup info streams
+var updateDirectory = path.join(__dirname, 'log', 'records', 'update');
+if(!fs.existsSync(updateDirectory)) {
+    fs.mkdirSync(updateDirectory);
+}
+var errorDirectory = path.join(__dirname, 'log', 'records', 'error');
+if(!fs.existsSync(errorDirectory)) {
+    fs.mkdirSync(errorDirectory);
+}
+var logger = new (winston.Logger)({
+    transports: [
+        new (winston.transports.DailyRotateFile)({
+            name: 'update-file',
+            filename: updateDirectory + '/update.log',
+            level: 'info',
+            datePattern: '.yyyy-MM-dd',
+            prepend: false
+        }),
+        new (winston.transports.DailyRotateFile)({
+            name: 'error-file',
+            filename: errorDirectory + '/error.log',
+            level: 'error',
+            datePattern: '.yyyy-MM-dd',
+            prepend: false
+        })
+    ]
+});
+
 
 /////////////////////////////////////////////////
 // QMiner functionality
@@ -92,7 +125,7 @@ function formatRequest(req, res, formatStyle) {
                 });
             }
         } catch (err) {
-            console.log(err);
+            logger.error("Unsuccessful query", { err_message: err, data: query });
             res.status(500).send({
                 error: "Error on Server Side..."
             });
@@ -124,14 +157,15 @@ app.route('/api/v1/jobs')
     // updates the database
     .post(function(req, res) {
         try {
-            var record = req.body;
-            baseHelper.updateBase(base, record, false);
+            var records = req.body;
+            baseHelper.updateBase(base, records, false);
             // update initialized data
-            init.update(record);
+            init.update(records);
+            logger.info("Database update", { records: records });
             // TODO: create static files of the databases
             res.status(200).end();
         } catch (err) {
-            console.log(err);
+            logger.error("Unsuccessful database update", { err_message: err, data: req.body });
             res.status(500).send({
                 error: "Error on Server Side..."
             });
