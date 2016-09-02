@@ -28,11 +28,14 @@ exports.toAllInfoFormat = function (records) {
             if (!loc.coord || loc.name === 'Northern Europe') {
                 return;
             }
+            var jobTitle = job.jobTitle.replace(/<\/?strong>/g, '');
+            jobTitle = jobTitle.replace(/&lt;\/?strong&gt;/g, '');
+
             return {
                 id:  job.$id,
                 timestamp: Date.parse(job.date),
                 date: job.dateFullStr,
-                jobTitle: job.jobTitle,
+                jobTitle: jobTitle,
                 organization: job.hiringOrganization,
                 description: job.description,
                 location_coord: loc.coord,

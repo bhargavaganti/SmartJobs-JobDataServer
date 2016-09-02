@@ -96,6 +96,19 @@ for (var fileN = 0; fileN < dirFiles.length; fileN++) {
             }
         }
 
+        // get only the job ID
+        switch(jobSource) {
+            case "Trovit":
+                jobUri = jobUri.match(/\/id\.(.*?)\//)[1];
+                break;
+            case "Adzuna":
+                jobUri = jobUri.split('/').last();
+                break;
+            default:
+                break;
+        }
+
+
         var country;
         if (countryName !== "") {
             // country data

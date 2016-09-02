@@ -8,7 +8,6 @@ var morgan = require('morgan');
 var winston = require('winston');
 var fs = require('fs');
 
-
 var app = express();
 // set static folder
 app.use(express.static(__dirname + '/public'));
@@ -68,7 +67,7 @@ var logger = new (winston.Logger)({
 var qm = require('qminer');
 // database containing all job posts
 var base = new qm.Base({
-    mode: 'openReadOnly',
+    mode: 'open',
     dbPath: './data/db/'
 });
 
@@ -141,9 +140,23 @@ function formatRequest(req, res, formatStyle) {
  */
 function formatSingleJob(req, res, formatStyle) {
     var id = req.params.id;
-    var record = base.store("JobPostings")[id];
-    var job = formatStyle(record);
-    res.status(200).send(job);
+    try {
+        var record = base.store("JobPostings")[id];
+        if (record instanceof qm.Record) {
+            var job = formatStyle(record);
+            res.status(200).send(job);
+        } else {
+            res.status(400).send({
+                error: "No Job with sprecified ID found: " + id,
+            });
+        }
+    } catch (err) {
+        logger.error("Unsuccessful format", { err_message: err, data: id });
+        res.status(500).send({
+            error: "Error on the Server Side..."
+        });
+    }
+
 }
 
 ///////////////////////////////////////////////////////////////////
