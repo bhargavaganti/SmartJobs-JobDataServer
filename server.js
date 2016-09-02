@@ -67,7 +67,7 @@ var logger = new (winston.Logger)({
 var qm = require('qminer');
 // database containing all job posts
 var base = new qm.Base({
-    mode: 'open',
+    mode: 'openReadOnly',
     dbPath: './data/db/'
 });
 
@@ -81,13 +81,18 @@ process.on('SIGINT', function() {
 /////////////////////////////////////////////////
 // Server routing and methods
 
-var initData = require('./app/initData');
-var baseHelper = require('./app/baseHelper');
-var format = require('./app/format');
-var search = require('./app/search');
 
-// prepate initial data for full base
-var init = initData(base);
+try {
+    var initData = require('./app/initData');
+    var baseHelper = require('./app/baseHelper');
+    var format = require('./app/format');
+    var search = require('./app/search');
+
+    // prepate initial data for full base
+    var init = initData(base);
+} catch(err) {
+    console.log(err);
+}
 
 app.get('/api/v1/', function(req, res) {
     // gets the API basic documentation

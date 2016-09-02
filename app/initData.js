@@ -1,5 +1,3 @@
-'use strict';
-
 // dependancy on format (requires EU countries)
 var format = require('./format');
 var winston = require('winston');
