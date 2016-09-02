@@ -28,15 +28,15 @@ exports.toAllInfoFormat = function (records) {
             if (!loc.coord || loc.name === 'Northern Europe') {
                 return;
             }
-            var jobTitle = job.jobTitle.replace(/<\/?strong>/g, '');
-            jobTitle = jobTitle.replace(/&lt;\/?strong&gt;/g, '');
+            var title = job.title.replace(/<\/?strong>/g, '');
+            title = title.replace(/&lt;\/?strong&gt;/g, '');
 
             return {
                 id:  job.$id,
                 timestamp: Date.parse(job.date),
                 date: job.dateFullStr,
-                jobTitle: jobTitle,
-                organization: job.hiringOrganization,
+                title: title,
+                organization: job.organization,
                 description: job.description,
                 location_coord: loc.coord,
                 location_city: loc.name,
@@ -66,8 +66,8 @@ exports.toAllInfoFormat = function (records) {
             id:  records.$id,
             timestamp: Date.parse(records.date),
             date: records.dateFullStr,
-            jobTitle: records.jobTitle,
-            organization: records.hiringOrganization,
+            title: records.title,
+            organization: records.organization,
             description: records.description,
             location_coord: loc.coord,
             location_city: loc.name,

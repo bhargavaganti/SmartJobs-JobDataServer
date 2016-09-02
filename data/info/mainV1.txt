@@ -38,12 +38,11 @@ For posting to the database, use the JSON structure:
 {
     "uri": "string",
     "url": "string",
-    "name": "string",
+    "title": "string",
     "date": "datetime",
     "dateFullStr": "string",
     "datePartStr": "string",
-    "hiringOrganization": "string",
-    "jobTitle": "string",
+    "organization": "string",
     "description": "string",
     "inLocation": {
         "uri": "string",

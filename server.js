@@ -169,16 +169,17 @@ app.route('/api/v1/jobs')
     })
     // updates the database
     .post(function(req, res) {
+        var records = req.body;
         try {
-            var records = req.body;
             baseHelper.updateBase(base, records, false);
+            logger.info("Database successfully updated", { records: records });
             // update initialized data
             init.update(records);
-            logger.info("Database update", { records: records });
+            logger.info("Initialization data updated", { records: records });
             // TODO: create static files of the databases
             res.status(200).end();
         } catch (err) {
-            logger.error("Unsuccessful database update", { err_message: err, data: req.body });
+            logger.error("Unsuccessful database update", { err_message: err, data: records });
             res.status(500).send({
                 error: "Error on Server Side..."
             });

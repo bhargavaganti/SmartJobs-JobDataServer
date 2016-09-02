@@ -134,12 +134,11 @@ for (var fileN = 0; fileN < dirFiles.length; fileN++) {
         var record = {
             uri: jobUri,
             url: jobUrl,
-            name: jobTitle,
+            title: jobTitle,
             date: date,
             dateFullStr: dateFullStr,
             datePartStr: datePartStr,
-            hiringOrganization: jobPostingOrg,
-            jobTitle: jobTitle,
+            organization: jobPostingOrg,
             description: jobDesc,
             // join - location
             inLocation: location,

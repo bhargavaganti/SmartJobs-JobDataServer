@@ -1,3 +1,5 @@
+'use strict';
+
 // dependancy on format (requires EU countries)
 var format = require('./format');
 var winston = require('winston');
@@ -42,7 +44,7 @@ function InitData(_base) {
 
     //////////////////////////////////////////////////
     // the initial statistic numbers
-    var numOfjobs = _base.store("JobPostings").length;
+    var numOfJobs = _base.store("JobPostings").length;
     var numOfLocations = _base.store("Locations").length;
     var numOfSkills = _base.store("Skills").length;
 
@@ -92,7 +94,7 @@ function InitData(_base) {
     this.getCount = function() {
         return {
             // basic statistics
-            numOfJobs: numOfjobs,
+            numOfJobs: numOfJobs,
             numOfLocations: numOfLocations,
             numOfSkills: numOfSkills
         };

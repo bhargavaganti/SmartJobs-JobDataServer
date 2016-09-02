@@ -4,12 +4,11 @@
         "fields": [
             { "name": "uri", "type": "string", "store": "cache", "primary": true },
             { "name": "url", "type": "string", "null": true },
-            { "name": "name", "type": "string", "null": true },
+            { "name": "title", "type": "string", "null": true },
             { "name": "date", "type": "datetime" },
     		{ "name": "dateFullStr", "type": "string", "null": true },
             { "name": "datePartStr", "type": "string", "null": true },
-    		{ "name": "hiringOrganization", "type": "string", "null": true },
-    		{ "name": "jobTitle", "type": "string", "null": true },
+    		{ "name": "organization", "type": "string", "null": true },
     		{ "name": "description", "type": "string", "null": true }
     	],
     	"joins": [
@@ -20,9 +19,8 @@
             { "name": "wikified", "type": "index", "store": "Concepts", "inverse": "foundForJobs" }
     	],
     	"keys": [
-    	    { "field": "name", "type": "text" },
-    	    { "field": "hiringOrganization", "type": "text" },
-    	    { "field": "jobTitle", "type": "text" },
+    	    { "field": "title", "type": "text" },
+    	    { "field": "organization", "type": "text" },
     	    { "field": "description", "type": "text" },
     	    { "field": "dateFullStr", "type": "text" },
             { "field": "datePartStr", "type": "text" }
