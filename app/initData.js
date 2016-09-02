@@ -42,9 +42,9 @@ function InitData(_base) {
 
     //////////////////////////////////////////////////
     // the initial statistic numbers
-    var numOfJobs = _base.store("JobPostings").length;
-    var numOfLocations = _base.store("Locations").length;
-    var numOfSkills = _base.store("Skills").length;
+    var numOfJobs = _base.store("Jobs").length;
+    var numOfLocations = _base.store("Jobs").length;
+    var numOfSkills = _base.store("Jobs").length;
 
     var skills = computeSkills(_base);
     var locations = computeLocations(_base);
@@ -82,7 +82,7 @@ function InitData(_base) {
             logger.info("Initialized data updated");
             return self;
         } catch (err) {
-            logger.error("Error with updating data", { err_message: err, data: records });
+            logger.error("Error with updating data", { err_message: err.message, data: records });
         }
     };
 
@@ -248,7 +248,7 @@ function InitData(_base) {
      * @return {Array.<Objects>} Array containing the sorted timeseries objects.
      */
     function computeTimeSeries(base) {
-        var jobs = base.store("JobPostings").allRecords;
+        var jobs = base.store("Jobs").allRecords;
 
         var timeSeries = [];
         var dateIdx = {},

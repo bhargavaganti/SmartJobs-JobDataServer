@@ -13,10 +13,10 @@ exports.updateBase = function (base, records, garbageF) {
     if (records instanceof Array) {
         for (var RecN = 0; RecN < records.length; RecN++) {
             var record = records[RecN];
-            base.store("JobPostings").push(record);
+            base.store("Jobs").push(record);
         }
     } else if (records instanceof Object) {
-        base.store("JobPostings").push(records);
+        base.store("Jobs").push(records);
     } else {
         throw "Records must be an Array of Object or an Object!";
     }

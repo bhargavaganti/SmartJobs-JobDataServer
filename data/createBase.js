@@ -167,9 +167,9 @@ recordArray.sort(function (a, b) {
 
 console.log("Pushing records to base");
 recordArray.forEach(function (record) {
-    base.store("JobPostings").push(record);
+    base.store("Jobs").push(record);
 });
 
-console.log(base.store("JobPostings").length);
+console.log(base.store("Jobs").length);
 // close the base
 base.close();

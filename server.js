@@ -131,7 +131,7 @@ function formatRequest(req, res, formatStyle) {
                 });
             }
         } catch (err) {
-            logger.error("Unsuccessful query", { err_message: err, data: query });
+            logger.error("Unsuccessful query", { err_message: err.message, data: query });
             res.status(500).send({
                 error: "Error on Server Side..."
             });
@@ -148,7 +148,7 @@ function formatRequest(req, res, formatStyle) {
 function formatSingleJob(req, res, formatStyle) {
     var id = req.params.id;
     try {
-        var record = base.store("JobPostings")[id];
+        var record = base.store("Jobs")[id];
         if (record instanceof qm.Record) {
             var job = formatStyle(record);
             res.status(200).send(job);
@@ -158,7 +158,7 @@ function formatSingleJob(req, res, formatStyle) {
             });
         }
     } catch (err) {
-        logger.error("Unsuccessful format", { err_message: err, data: id });
+        logger.error("Unsuccessful format", { err_message: err.message, data: id });
         res.status(500).send({
             error: "Error on the Server Side..."
         });
@@ -177,8 +177,6 @@ app.route('/api/v1/jobs')
     // updates the database
     .post(function(req, res) {
         var records = req.body;
-        console.log(typeof records);
-        console.log(records);
         try {
             baseHelper.updateBase(base, records, false);
             logger.info("Database successfully updated", { records: records });
@@ -188,7 +186,7 @@ app.route('/api/v1/jobs')
             // TODO: create static files of the databases
             res.status(200).end();
         } catch (err) {
-            logger.error("Unsuccessful database update", { data: records });
+            logger.error("Unsuccessful database update", { err_message: err.message, data: records });
             res.status(500).send({
                 error: "Error on Server Side..."
             });

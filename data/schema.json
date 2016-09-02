@@ -1,6 +1,6 @@
 [
     {
-        "name": "JobPostings",
+        "name": "Jobs",
         "fields": [
             { "name": "uri", "type": "string", "store": "cache", "primary": true },
             { "name": "url", "type": "string", "null": true },
@@ -34,7 +34,7 @@
             { "name": "type", "type": "string", "null": true }
         ],
         "joins": [
-            { "name": "requiredForJobs", "type": "index", "store": "JobPostings", "inverse": "requiredSkills" }
+            { "name": "requiredForJobs", "type": "index", "store": "Jobs", "inverse": "requiredSkills" }
         ],
         "keys": [
             { "field": "name", "type": "text" }
@@ -46,7 +46,7 @@
             { "name": "name", "type": "string", "primary": true }
         ],
         "joins": [
-            { "name": "foundForJobs", "type": "index", "store": "JobPostings", "inverse": "wikified" }
+            { "name": "foundForJobs", "type": "index", "store": "Jobs", "inverse": "wikified" }
         ],
         "keys": [
             { "field": "name", "type": "text" }
@@ -60,7 +60,7 @@
             { "name": "name", "type": "string", "null": true }
         ],
         "joins": [
-            { "name": "foundJobs", "type": "index", "store": "JobPostings", "inverse": "inLocation" },
+            { "name": "foundJobs", "type": "index", "store": "Jobs", "inverse": "inLocation" },
             { "name": "inCountry", "type": "field", "store": "Countries", "inverse": "hasLocations" }
         ],
         "keys": [
@@ -75,7 +75,7 @@
             { "name": "name", "type": "string", "null": true }
         ],
         "joins": [
-            { "name": "foundJobs", "type": "index", "store": "JobPostings", "inverse": "inCountry" },
+            { "name": "foundJobs", "type": "index", "store": "Jobs", "inverse": "inCountry" },
             { "name": "hasLocations", "type": "index", "store": "Locations", "inverse": "inCountry" }
         ],
         "keys": [
@@ -88,7 +88,7 @@
             { "name": "name", "type": "string", "store": "cache", "primary": true }
         ],
         "joins": [
-            { "name": "found", "type": "index", "store": "JobPostings", "inverse": "foundIn" }
+            { "name": "found", "type": "index", "store": "Jobs", "inverse": "foundIn" }
         ]
     }
 ]
