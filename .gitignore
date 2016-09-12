@@ -11,3 +11,9 @@ data/demand/
 
 # log files
 log/**/*.log*
+
+# npm files
+npm-debug.log
+
+# development tools
+dev/test-server.js

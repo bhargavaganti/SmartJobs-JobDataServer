@@ -19,30 +19,58 @@ exports.EUCountries = ['Andorra', 'Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'C
  * @return {Array.<Object>} The converted object array.
  */
 exports.toAllInfoFormat = function (records) {
+
+    // stores the data in all info format
+    function allInfoFormat(record) {
+        var skills = record.requiredSkills;
+        var loc = record.inLocation;
+        var country = record.inCountry;
+        // TODO: do something with the jobs with invalid coordinates
+        if (!loc.coord || loc.name === 'Northern Europe') {
+            return;
+        }
+        var title = record.title.replace(/<\/?strong>/g, '');
+        title = title.replace(/&lt;\/?strong&gt;/g, '');
+
+        return {
+            id:  record.$id,
+            timestamp: Date.parse(record.date),
+            date: record.dateFullStr,
+            title: title,
+            organization: record.organization,
+            description: record.description,
+            location_coord: loc.coord,
+            location_city: loc.name,
+            location_country: country.name,
+            skillset: skills.map(function (skill) { return skill.name; })
+        };
+    }
+
     if (records instanceof qm.RecSet) {
         var jobArray = records.map(function (job) {
-            var skills = job.requiredSkills;
-            var loc = job.inLocation;
-            var country = job.inCountry;
-            // TODO: do something with the jobs with invalid coordinates
-            if (!loc.coord || loc.name === 'Northern Europe') {
-                return;
-            }
-            var title = job.title.replace(/<\/?strong>/g, '');
-            title = title.replace(/&lt;\/?strong&gt;/g, '');
-
-            return {
-                id:  job.$id,
-                timestamp: Date.parse(job.date),
-                date: job.dateFullStr,
-                title: title,
-                organization: job.organization,
-                description: job.description,
-                location_coord: loc.coord,
-                location_city: loc.name,
-                location_country: country.name,
-                skillset: skills.map(function (skill) { return skill.name; })
-            };
+            return allInfoFormat(job);
+            // var skills = job.requiredSkills;
+            // var loc = job.inLocation;
+            // var country = job.inCountry;
+            // // TODO: do something with the jobs with invalid coordinates
+            // if (!loc.coord || loc.name === 'Northern Europe') {
+            //     return;
+            // }
+            // var title = job.title.replace(/<\/?strong>/g, '');
+            // title = title.replace(/&lt;\/?strong&gt;/g, '');
+            //
+            // return {
+            //     id:  job.$id,
+            //     timestamp: Date.parse(job.date),
+            //     date: job.dateFullStr,
+            //     title: title,
+            //     organization: job.organization,
+            //     description: job.description,
+            //     location_coord: loc.coord,
+            //     location_city: loc.name,
+            //     location_country: country.name,
+            //     skillset: skills.map(function (skill) { return skill.name; })
+            // };
         });
         // remove null occurrences
         jobArray = jobArray.filter(function (rec) { return rec !== null && rec !== undefined; });
@@ -55,25 +83,26 @@ exports.toAllInfoFormat = function (records) {
         return data;
         // TODO: replace the condition when possible
     } else if (typeof records === "object" /*instanceof qm.Record*/) {
-        var skills = records.requiredSkills;
-        var loc = records.inLocation;
-        var country = records.inCountry;
-        // TODO: do something with the jobs with invalid coordinates
-        if (!loc.coord || loc.name === 'Northern Europe') {
-            return;
-        }
-        return {
-            id:  records.$id,
-            timestamp: Date.parse(records.date),
-            date: records.dateFullStr,
-            title: records.title,
-            organization: records.organization,
-            description: records.description,
-            location_coord: loc.coord,
-            location_city: loc.name,
-            location_country: country.name,
-            skillset: skills.map(function (skill) { return skill.name; })
-        };
+        return allInfoFormat(records);
+        // var skills = records.requiredSkills;
+        // var loc = records.inLocation;
+        // var country = records.inCountry;
+        // // TODO: do something with the jobs with invalid coordinates
+        // if (!loc.coord || loc.name === 'Northern Europe') {
+        //     return;
+        // }
+        // return {
+        //     id:  records.$id,
+        //     timestamp: Date.parse(records.date),
+        //     date: records.dateFullStr,
+        //     title: records.title,
+        //     organization: records.organization,
+        //     description: records.description,
+        //     location_coord: loc.coord,
+        //     location_city: loc.name,
+        //     location_country: country.name,
+        //     skillset: skills.map(function (skill) { return skill.name; })
+        // };
     } else {
         throw "format.toAllInfoFormat: records is not a Record or RecordSet!";
     }
@@ -86,21 +115,40 @@ exports.toAllInfoFormat = function (records) {
  * @return {Array.<Object>} The converted object array.
  */
 exports.toLocationFormat = function (records) {
+
+    // stores the data in location format
+    function locationFormat(record) {
+        var skills = record.requiredSkills;
+        var loc = record.inLocation;
+        var country = record.inCountry;
+        // TODO: do something with the jobs with invalid coordinates
+        if (!loc.coord || loc.name === 'Northern Europe') {
+            return;
+        }
+        return {
+            id:  record.$id,
+            location_coord: loc.coord,
+            location_city: loc.name,
+            location_country: country.name
+        };
+    }
+
     if (records instanceof qm.RecSet) {
         var jobArray = records.map(function (job) {
-            var skills = job.requiredSkills;
-            var loc = job.inLocation;
-            var country = job.inCountry;
-            // TODO: do something with the jobs with invalid coordinates
-            if (!loc.coord || loc.name === 'Northern Europe') {
-                return;
-            }
-            return {
-                id:  job.$id,
-                location_coord: loc.coord,
-                location_city: loc.name,
-                location_country: country.name
-            };
+            return locationFormat(job);
+            // var skills = job.requiredSkills;
+            // var loc = job.inLocation;
+            // var country = job.inCountry;
+            // // TODO: do something with the jobs with invalid coordinates
+            // if (!loc.coord || loc.name === 'Northern Europe') {
+            //     return;
+            // }
+            // return {
+            //     id:  job.$id,
+            //     location_coord: loc.coord,
+            //     location_city: loc.name,
+            //     location_country: country.name
+            // };
         });
         // remove null occurrences
         jobArray = jobArray.filter(function (rec) { return rec !== null && rec !== undefined; });
@@ -113,19 +161,20 @@ exports.toLocationFormat = function (records) {
         return data;
         // TODO: replace the condition when possible
     } else if (typeof records === "object" /*instanceof qm.Record*/) {
-        var skills = records.requiredSkills;
-        var loc = records.inLocation;
-        var country = records.inCountry;
-        // TODO: do something with the jobs with invalid coordinates
-        if (!loc.coord || loc.name === 'Northern Europe') {
-            return;
-        }
-        return {
-            id:  records.$id,
-            location_coord: loc.coord,
-            location_city: loc.name,
-            location_country: country.name
-        };
+        return locationFormat(records);
+        // var skills = records.requiredSkills;
+        // var loc = records.inLocation;
+        // var country = records.inCountry;
+        // // TODO: do something with the jobs with invalid coordinates
+        // if (!loc.coord || loc.name === 'Northern Europe') {
+        //     return;
+        // }
+        // return {
+        //     id:  records.$id,
+        //     location_coord: loc.coord,
+        //     location_city: loc.name,
+        //     location_country: country.name
+        // };
     } else {
         throw "format.toLocationAndSkillsFormat: records is not a Record or RecordSet!";
     }

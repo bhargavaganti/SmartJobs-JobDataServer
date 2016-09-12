@@ -62,6 +62,22 @@ var logger = new (winston.Logger)({
     ]
 });
 
+// create the pending folder
+var pendingDirectory = path.join(__dirname, 'data', 'pending');
+if(!fs.existsSync(pendingDirectory)) {
+    fs.mkdirSync(pendingDirectory);
+}
+
+// delete the pending file
+function deletePendingFile() {
+    fs.stat(pendingDirectory + '/pending.txt', function (err, stat) {
+        if (err === null) {
+            fs.unlink(pendingDirectory + '/pending.txt', function (err) {
+                if (err) console.log(err);
+            });
+        }
+    });
+}
 
 /////////////////////////////////////////////////
 // QMiner functionality
@@ -76,13 +92,11 @@ var base = new qm.Base({
 // on CTRL+C
 process.on('SIGINT', function() {
     base.close();
-    // TODO: close monthly database
     process.exit();
 });
 
 /////////////////////////////////////////////////
 // Server routing and methods
-
 
 try {
     var initData = require('./app/initData');
@@ -148,8 +162,8 @@ function formatRequest(req, res, formatStyle) {
 function formatSingleJob(req, res, formatStyle) {
     var id = req.params.id;
     try {
-        var record = base.store("Jobs")[id];
-        if (record instanceof qm.Record) {
+        var record = base.store("JobPostings")[id];
+        if (record instanceof Object /* qm.Record */) {
             var job = formatStyle(record);
             res.status(200).send(job);
         } else {
@@ -169,6 +183,19 @@ function formatSingleJob(req, res, formatStyle) {
 ///////////////////////////////////////////////////////////////////
 // All Records Routers
 
+// closes and restarts the base (it stores the data)
+app.get('/api/v1/restart', function (req, res) {
+    // close the base (stores the records)
+    base.close();
+    // reopen the base
+    base = new qm.Base({
+        mode: 'open',
+        dbPath: './data/db/'
+    });
+    res.status(200).end();
+});
+
+// gets and posts the jobs postingss
 app.route('/api/v1/jobs')
     // gets all the info of the queried jobs
     .get(function(req, res) {
@@ -180,11 +207,8 @@ app.route('/api/v1/jobs')
         try {
             baseHelper.updateBase(base, records, false);
             logger.info("Database successfully updated", { records: records });
-            // update initialized data
-            init.update(records);
-            logger.info("Initialization data updated", { records: records });
             // TODO: create static files of the databases
-            res.status(200).end();
+            res.status(200).send({ message: "Database updated!" });
         } catch (err) {
             logger.error("Unsuccessful database update", { err_message: err.message, data: records });
             res.status(500).send({
@@ -233,6 +257,14 @@ app.get('/api/v1/jobs/:id/locations_and_skills', function (req, res) {
 
 ///////////////////////////////////////////////////////////////////
 // Lists of all skills, locations, countries and timeSeries
+
+app.get('/api/v1/stats/update', function (req, res) {
+    // update initialized data
+    init.update(base, true);
+    logger.info("Initialization data updated");
+    deletePendingFile();
+    res.status(200).end();
+});
 
 app.get('/api/v1/stats/count', function(req, res) {
     var initVal = init.getCount();

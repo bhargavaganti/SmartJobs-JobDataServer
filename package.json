@@ -12,22 +12,24 @@
     "winston": "^2.2.0",
     "winston-daily-rotate-file": "^1.3.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "request": "^2.74.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ErikNovak/jobanalysis-dataserver.git"
   },
   "keywords": [
-    "database",
-    "API"
+    "API",
+    "database"
   ],
   "author": [
-    "Inna Novalija <inna.novalija@ijs.si>",
-    "Erik Novak <erik.novak@ijs.si>"
+    "Erik Novak <erik.novak@ijs.si>",
+    "Inna Novalija <inna.novalija@ijs.si>"
   ],
   "license": "MIT",
   "bugs": {

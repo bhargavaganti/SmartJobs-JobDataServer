@@ -42,14 +42,16 @@ function InitData(_base) {
 
     //////////////////////////////////////////////////
     // the initial statistic numbers
-    var numOfJobs = _base.store("Jobs").length;
-    var numOfLocations = _base.store("Jobs").length;
-    var numOfSkills = _base.store("Jobs").length;
+    var numOfJobs = _base.store("JobPostings").length;
+    var numOfLocations = _base.store("Locations").length;
+    var numOfSkills = _base.store("Skills").length;
+    var numOfConcepts = _base.store("Concepts").length;
 
     var skills = computeSkills(_base);
     var locations = computeLocations(_base);
     var countries = computeCountries(_base);
     var timeSeries = computeTimeSeries(_base);
+    var concepts = computeConcepts(_base);
 
     /**
      * Updates the data.
@@ -57,28 +59,21 @@ function InitData(_base) {
      * @param {Boolean} [sortF = false] - If true, sorts the arrays.
      * @return {Object} Self.
      */
-    this.update = function(records, sortF) {
+    this.update = function(base, sortF) {
+        var sort = sortF === undefined ? false : sortF;
         try {
-            var sort = sortF === undefined ? false : sortF;
-            if (records instanceof Array) {
-                records.forEach(function(rec) {
-                    updateInitArray(locations, rec.inLocation, sort);
-                    updateInitArray(countries, rec.inCountry, sort);
-                    updateInitArray(skills, rec.requiredSkills, sort);
-                    updateTimeSeriesArray(skills, rec, sort);
-                });
-            } else if (records instanceof Object) {
-                updateInitArray(locations, records.inLocation, sort);
-                updateInitArray(countries, records.inCountry, sort);
-                updateInitArray(skills, records.requiredSkills, sort);
-                updateTimeSeriesArray(skills, records, sort);
-            } else {
-                throw "InitData.update: Records must be an array of Objects or an Object";
-            }
+
+            skills = computeSkills(base, sort);
+            locations = computeLocations(base, sort);
+            countries = computeCountries(base, sort);
+            timeSeries = computeTimeSeries(base, sort);
+            concepts = computeConcepts(_base, sort);
+
             // update the initial statistics
-            numOfJobs += records.length;
-            numOfLocations = locations.length;
-            numOfSkills = skills.length;
+            numOfJobs = base.store("JobPostings").length;
+            numOfLocations = base.store("Locations").length;
+            numOfSkills = base.store("Skills").length;
+            numOfConcepts = base.store("Concepts").length;
             logger.info("Initialized data updated");
             return self;
         } catch (err) {
@@ -162,17 +157,29 @@ function InitData(_base) {
     // initialization functions
     /**
      * Calculates the initialization skills array.
-     * @param  {module:qm.Base} base - The given database.
-     * @return {Array.<Objects>} Array containing the sorted skill objects.
+     * @param {module:qm.Base} base - The given database.
+     * @param {Boolean} sortF - If true, the array is sorted in descending order.
+     * @return {Array.<Objects>} Array containing the (sorted) skill objects.
      */
-    function computeSkills(base) {
+    function computeSkills(base, sortF) {
+        var sort = sortF === undefined ? false : sortF;
+
         var skills = base.store("Skills").allRecords;
         // sort in descending order
-        skills.sort(function(skill1, skill2) {
-            var jobs1 = skill1.requiredForJobs.length;
-            var jobs2 = skill2.requiredForJobs.length;
-            return jobs2 - jobs1;
-        });
+        if (sort) {
+            skills.sort(function(skill1, skill2) {
+                var jobs1 = skill1.requiredForJobs.length;
+                var jobs2 = skill2.requiredForJobs.length;
+                if (jobs2 < jobs1) {
+                    return 1;
+                } else if (jobs2 > jobs1) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+        }
+
         // get the top 50 skills with number of jobs
         var topSkills = skills.map(function(skill) {
             var skillPair = {
@@ -188,20 +195,31 @@ function InitData(_base) {
     /**
      * Calculates the initialization location array.
      * @param  {module:qm.Base} base - The given database.
-     * @return {Array.<Objects>} Array containing the sorted locations objects.
+     * @param {Boolean} sortF - If true, the array is sorted in descending order.
+     * @return {Array.<Objects>} Array containing the (sorted) locations objects.
      */
-    function computeLocations(base) {
+    function computeLocations(base, sortF) {
+        var sort = sortF === undefined ? false : sortF;
+
         var locations = base.store("Locations").allRecords;
         // remove country locations
         locations.filter(function(loc) {
             return format.EUCountries.indexOf(loc.name) === -1;
         });
         // sort the remaining locations in descending order
-        locations.sort(function(loc1, loc2) {
-            var jobs1 = loc1.foundJobs.length;
-            var jobs2 = loc2.foundJobs.length;
-            return jobs2 - jobs1;
-        });
+        if (sort) {
+            locations.sort(function(loc1, loc2) {
+                var jobs1 = loc1.foundJobs.length;
+                var jobs2 = loc2.foundJobs.length;
+                if (jobs2 < jobs1) {
+                    return 1;
+                } else if (jobs2 > jobs1) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+        }
         // get the top locations with number of jobs
         var topLocations = [];
         for (var locN = 0; locN < locations.length; locN++) {
@@ -220,16 +238,27 @@ function InitData(_base) {
     /**
      * Calculates the initialization countries array.
      * @param  {module:qm.Base} base - The given database.
-     * @return {Array.<Objects>} Array containing the sorted countries objects.
+     * @param {Boolean} sortF - If true, the array is sorted in descending order.
+     * @return {Array.<Objects>} Array containing the (sorted) countries objects.
      */
-    function computeCountries(base) {
+    function computeCountries(base, sortF) {
+        var sort = sortF === undefined ? false : sortF;
+
         var countries = base.store("Countries").allRecords;
         // sort in descending order
-        countries.sort(function(country1, country2) {
-            var jobs1 = country1.foundJobs.length;
-            var jobs2 = country2.foundJobs.length;
-            return jobs2 - jobs1;
-        });
+        if (sort) {
+            countries.sort(function(country1, country2) {
+                var jobs1 = country1.foundJobs.length;
+                var jobs2 = country2.foundJobs.length;
+                if (jobs2 < jobs1) {
+                    return 1;
+                } else if (jobs2 > jobs1) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+        }
         // get the country names with number of jobs
         var topCountries = countries.map(function(country) {
             var countryPair = {
@@ -245,10 +274,13 @@ function InitData(_base) {
     /**
      * Calculates the initialization timeseries array.
      * @param  {module:qm.Base} base - The given database.
-     * @return {Array.<Objects>} Array containing the sorted timeseries objects.
+     * @param {Boolean} sortF - If true, the array is sorted in descending order.
+     * @return {Array.<Objects>} Array containing the (sorted) timeseries objects.
      */
-    function computeTimeSeries(base) {
-        var jobs = base.store("Jobs").allRecords;
+    function computeTimeSeries(base, sortF) {
+        var sort = sortF === undefined ? false : sortF;
+
+        var jobs = base.store("JobPostings").allRecords;
 
         var timeSeries = [];
         var dateIdx = {},
@@ -285,33 +317,70 @@ function InitData(_base) {
                 dateIdx[job.dateFullStr] = idx++;
             }
         });
-        timeSeries.sort(function(obj1, obj2) {
-            var timestamp1 = (new Date(obj1.name)).getTime();
-            var timestamp2 = (new Date(obj2.name)).getTime();
-            if (timestamp1 < timestamp2) {
-                return -1;
-            } else if (timestamp1 > timestamp2) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-        timeSeries.forEach(function(day) {
-            day.skillset.sort(function(skill1, skill2) {
-                if (skill2.value < skill1.value) {
+        if (sort) {
+            timeSeries.sort(function(obj1, obj2) {
+                var timestamp1 = (new Date(obj1.name)).getTime();
+                var timestamp2 = (new Date(obj2.name)).getTime();
+                if (timestamp1 < timestamp2) {
+                    return -1;
+                } else if (timestamp1 > timestamp2) {
                     return 1;
-                } else if (skill2.value < skill1.value) {
+                } else {
+                    return 0;
+                }
+            });
+            timeSeries.forEach(function(day) {
+                day.skillset.sort(function(skill1, skill2) {
+                    if (skill2.value < skill1.value) {
+                        return 1;
+                    } else if (skill2.value < skill1.value) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                });
+            });
+        }
+
+        logger.info("Initialized timeseries");
+        return timeSeries;
+    }
+
+    /**
+     * Calculates the initialization concepts array.
+     * @param  {module:qm.Base} base - The given database.
+     * @param {Boolean} sortF - If true, the array is sorted in descending order.
+     * @return {Array.<Objects>} Array containing the (sorted) concepts objects.
+     */
+    function computeConcepts(base, sortF) {
+        var sort = sortF === undefined ? false : sortF;
+
+        var concepts = base.store("Concepts").allRecords;
+        // sort in descending order
+        if (sort) {
+            concepts.sort(function(concept1, concept2) {
+                var jobs1 = concept1.foundForJobs.length;
+                var jobs2 = concept2.foundForJobs.length;
+                if (jobs2 < jobs1) {
+                    return 1;
+                } else if (jobs2 > jobs1) {
                     return -1;
                 } else {
                     return 0;
                 }
             });
+        }
+        // get the country names with number of jobs
+        var topConcepts = concepts.map(function(concept) {
+            var conceptPair = {
+                name: concept.name,
+                value: concept.foundForJobs.length
+            };
+            return conceptPair;
         });
-        logger.info("Initialized timeseries");
-        return timeSeries;
+        logger.info("Initialized concepts");
+        return topConcepts;
     }
-
-
 
     /////////////////////////
     // Helpers
