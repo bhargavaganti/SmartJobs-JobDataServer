@@ -67,7 +67,7 @@ function InitData(_base) {
             locations = computeLocations(base, sort);
             countries = computeCountries(base, sort);
             timeSeries = computeTimeSeries(base, sort);
-            concepts = computeConcepts(_base, sort);
+            concepts = computeConcepts(base, sort);
 
             // update the initial statistics
             numOfJobs = base.store("JobPostings").length;
@@ -77,7 +77,7 @@ function InitData(_base) {
             logger.info("Initialized data updated");
             return self;
         } catch (err) {
-            logger.error("Error with updating data", { err_message: err.message, data: records });
+            logger.error("Error with updating data", { err_message: err.message });
         }
     };
 
