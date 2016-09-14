@@ -1,17 +1,21 @@
 # Development Files
 
-Contains the files used to restart the server if it isn't running and to store and update the database.
+Contains the files used to create the server as a service and to store and update the database.
 
-## Running the server
+**Note:** If necessary, change the paths in `.cmd` file is located.
 
-The file `run-server.cmd` checks if the server is down and restarts it. Used to automatically check if the server is running (task scheduler).
+## Start the server as a service
+
+This are the instructions how to run the server as a service using nssm. This will watch the service and if the service (server) stops working it will automatically restart the service.
+
+**Perequisites:** nssm must be found in the system path. The program can be [downloaded here.](https://nssm.cc/download) Add the path to the system environments.
+
+Once the nssm folder is in the system environments path, run CreateService.cmd in the Command Prompt run as Administrator. This will make the server service under the name "Job Data Server Service".
 
 ## Updating the database
 
-File `ping-update.cmd` updates the database on the server. It calls the corresponding paths in the API to manually store and update the database. If the server is down, it waits 5 minutes and checks again if the server is running.
+File `UpdateDatabase.cmd` updates the database on the server. It calls the corresponding paths in the API to manually store and update the database. If the server is down, it waits 5 minutes and checks again if the server is running. Add it to task scheduler.
 
 ### Request files
 
-The files `ping-restartbase.js` and `ping-update.js` are helper scripts that store and update the database.
-
-**Note:** If necessary, change the path where the `.cmd` file is located.
+Files `restartBase.js` and `updateDatabase.js` are helper scripts that store and update the database.
