@@ -8,6 +8,7 @@ node_modules/
 CIKM/
 data/db/
 data/demand/
+data/pending/
 
 # log files
 log/**/*.log*
