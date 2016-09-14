@@ -35,8 +35,5 @@
   "bugs": {
     "url": "https://github.com/ErikNovak/jobanalysis-dataserver/issues"
   },
-  "homepage": "https://github.com/ErikNovak/jobanalysis-dataserver#readme",
-  "config": {
-    "port": 2510
-  }
+  "homepage": "https://github.com/ErikNovak/jobanalysis-dataserver#readme"
 }
