@@ -1,12 +1,4 @@
 var qm = require('qminer');
-var path = require('path');
-var fs = require('fs');
-
-// making sure this folder exists
-var pendingDirectory = path.join(__dirname, '..', 'data', 'pending');
-if(!fs.existsSync(pendingDirectory)) {
-    fs.mkdirSync(pendingDirectory);
-}
 
 /**
  * The postings storage class. Stores the postings that were Sent
@@ -19,10 +11,15 @@ function postingsStorage(filepath) {
 
     // postings container
     var storage = [];
+    // where the stores are saved on disc
+    var pendingFile = '';
 
     // load the storage with pathfile
     if (typeof filepath === 'string') {
         try {
+            // save the path
+            pendingFile = filepath;
+            // if file exists, load the file data
             var fin = qm.fs.openRead(filepath);
             storage = fin.readJson();
         } catch (err) {
@@ -52,6 +49,15 @@ function postingsStorage(filepath) {
     this.getPostings = function () {
         return storage;
     };
+
+    /**
+     * Gets the pending path.
+     * @return {Array.<Object>} The stored postings.
+     */
+    this.getPendingPath = function () {
+        return pendingFile;
+    };
+
 
     /**
      * Clears the storage.
