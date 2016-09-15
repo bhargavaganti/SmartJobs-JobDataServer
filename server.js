@@ -13,14 +13,17 @@ var app = express();
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({
-    extended: true          // for parsing application/x-www-form-urlencoded
+    extended: true // for parsing application/x-www-form-urlencoded
 }));
 
 app.disable('x-powered-by');
 
+/////////////////////////////////////////////////
+// Logger and file system init
+
 // setup logger
 var accessDirectory = path.join(__dirname, 'log', 'access');
-if(!fs.existsSync(accessDirectory)) {
+if (!fs.existsSync(accessDirectory)) {
     fs.mkdirSync(accessDirectory);
 }
 var accessLogStream = FileStreamRotator.getStream({
@@ -29,30 +32,32 @@ var accessLogStream = FileStreamRotator.getStream({
     frequency: 'daily',
     verbose: false
 });
-app.use(morgan('short', { stream: accessLogStream }));
+app.use(morgan('short', {
+    stream: accessLogStream
+}));
 
 // file rotation for winston
 winston.transports.DailyRotateFile = require('winston-daily-rotate-file');
 
 // setup info streams
 var updateDirectory = path.join(__dirname, 'log', 'records', 'update');
-if(!fs.existsSync(updateDirectory)) {
+if (!fs.existsSync(updateDirectory)) {
     fs.mkdirSync(updateDirectory);
 }
 var errorDirectory = path.join(__dirname, 'log', 'records', 'error');
-if(!fs.existsSync(errorDirectory)) {
+if (!fs.existsSync(errorDirectory)) {
     fs.mkdirSync(errorDirectory);
 }
-var logger = new (winston.Logger)({
+var logger = new(winston.Logger)({
     transports: [
-        new (winston.transports.DailyRotateFile)({
+        new(winston.transports.DailyRotateFile)({
             name: 'update-file',
             filename: updateDirectory + '/update.log',
             level: 'info',
             datePattern: '.yyyy-MM-dd',
             prepend: false
         }),
-        new (winston.transports.DailyRotateFile)({
+        new(winston.transports.DailyRotateFile)({
             name: 'error-file',
             filename: errorDirectory + '/error.log',
             level: 'error',
@@ -64,19 +69,9 @@ var logger = new (winston.Logger)({
 
 // create the pending folder
 var pendingDirectory = path.join(__dirname, 'data', 'pending');
-if(!fs.existsSync(pendingDirectory)) {
+var pendingFile = path.join(pendingDirectory, 'pending.json');
+if (!fs.existsSync(pendingDirectory)) {
     fs.mkdirSync(pendingDirectory);
-}
-
-// delete the pending file
-function deletePendingFile() {
-    fs.stat(pendingDirectory + '/pending.txt', function (err, stat) {
-        if (err === null) {
-            fs.unlink(pendingDirectory + '/pending.txt', function (err) {
-                if (err) console.log(err);
-            });
-        }
-    });
 }
 
 /////////////////////////////////////////////////
@@ -85,7 +80,7 @@ function deletePendingFile() {
 var qm = require('qminer');
 // database containing all job posts
 var base = new qm.Base({
-    mode: 'open',
+    mode: 'openReadOnly',
     dbPath: './data/db/'
 });
 
@@ -96,26 +91,21 @@ process.on('SIGINT', function() {
 });
 
 /////////////////////////////////////////////////
-// Server routing and methods
+// Preparing helper objects and format functions
+
+var storage; // the postings storage
+var init; // the initialization data
+var format; // format functions
+var search; // search function
 
 try {
-    var initData = require('./app/initData');
-    var baseHelper = require('./app/baseHelper');
-    var format = require('./app/format');
-    var search = require('./app/search');
-
-    // prepate initial data for full base
-    var init = initData(base);
-} catch(err) {
+    storage = require('./app/postingsStorage')(pendingFile);
+    init = require('./app/initData')(base);
+    format = require('./app/format');
+    search = require('./app/search');
+} catch (err) {
     console.log(err);
 }
-
-app.get('/api/v1/', function(req, res) {
-    // gets the API basic documentation
-    res.status(200).sendFile('data/info/mainV1.txt', {
-        root: __dirname
-    });
-});
 
 /**
  * Queries, formats and sends the data back to the client.
@@ -123,7 +113,7 @@ app.get('/api/v1/', function(req, res) {
  * @param  {express.response} res - The response.
  * @param  {function} formatStyle - The format function to format the output data.
  */
-function formatRequest(req, res, formatStyle) {
+function formatRequestSeveral(req, res, formatStyle) {
     // get the query
     var query = req.query;
     if (Object.keys(query).length === 0 && query instanceof Object) {
@@ -145,7 +135,10 @@ function formatRequest(req, res, formatStyle) {
                 });
             }
         } catch (err) {
-            logger.error("Unsuccessful query", { err_message: err.message, data: query });
+            logger.error("Unsuccessful query", {
+                err_message: err.message,
+                data: query
+            });
             res.status(500).send({
                 error: "Error on Server Side..."
             });
@@ -159,11 +152,11 @@ function formatRequest(req, res, formatStyle) {
  * @param  {express.response} res - The response.
  * @param  {function} formatStyle - The format function to format the output data.
  */
-function formatSingleJob(req, res, formatStyle) {
+function formatRequestSingle(req, res, formatStyle) {
     var id = req.params.id;
     try {
         var record = base.store("JobPostings")[id];
-        if (record instanceof Object /* qm.Record */) {
+        if (record instanceof Object /* qm.Record */ ) {
             var job = formatStyle(record);
             res.status(200).send(job);
         } else {
@@ -172,45 +165,104 @@ function formatSingleJob(req, res, formatStyle) {
             });
         }
     } catch (err) {
-        logger.error("Unsuccessful format", { err_message: err.message, data: id });
+        logger.error("Unsuccessful format", {
+            err_message: err.message,
+            data: id
+        });
         res.status(500).send({
             error: "Error on the Server Side..."
         });
     }
-
 }
 
-///////////////////////////////////////////////////////////////////
-// All Records Routers
+/////////////////////////////////////////////////
+// Routers
 
-// closes and restarts the base (it stores the data)
-app.get('/api/v1/restart', function (req, res) {
-    // close the base (stores the records)
-    base.close();
-    // reopen the base
-    base = new qm.Base({
-        mode: 'open',
-        dbPath: './data/db/'
+// Main page
+app.get('/api/v1/', function(req, res) {
+    // gets the API basic documentation
+    res.status(200).sendFile('data/info/mainV1.txt', {
+        root: __dirname
     });
-    res.status(200).end();
 });
 
-// gets and posts the jobs postingss
+// closes and restarts the base (it stores the data)
+// TODO: set the restart route (maybe rename it)
+app.get('/api/v1/database_update', function(req, res) {
+    try {
+        console.time("Update");
+        
+        ///////////////////////////////
+        // updates the database
+        var postings = storage.getPostings();
+        // open the base for record update
+        base.close();
+        base = new qm.Base({
+            mode: 'open',
+            dbPath: './data/db/'
+        });
+        // update the database
+        if (postings instanceof Array) {
+            for (var RecN = 0; RecN < postings.length; RecN++) {
+                var record = postings[RecN];
+                base.store("JobPostings").push(record);
+            }
+        } else if (postings instanceof Object) {
+            base.store("JobPostings").push(postings);
+        } else {
+            throw "Records must be an Array of Object or an Object!";
+        }
+        // open database in read only mode
+        base.close();
+        base = new qm.Base({
+            mode: 'openReadOnly',
+            dbPath: './data/db/'
+        });
+        // clear the storage
+        storage.clear().save(storage.getPendingPath());
+
+        ///////////////////////////////
+        // updates init data
+        init.update(base, true);
+
+        console.timeEnd("Update");
+
+        logger.info("Database updated");
+        res.status(200).send({
+            message: "Successful update"
+        });
+    } catch (err) {
+        logger.error("Unsucessful Database update", {
+            err_message: err.message
+        });
+        res.status(500).send({
+            message: "Unsuccessful update"
+        });
+    }
+});
+
 app.route('/api/v1/jobs')
     // gets all the info of the queried jobs
     .get(function(req, res) {
-        formatRequest(req, res, format.toAllInfoFormat);
+        formatRequestSeveral(req, res, format.toAllInfoFormat);
     })
-    // updates the database
+    // saves the posted postings
     .post(function(req, res) {
-        var records = req.body;
+        var postings = req.body;
         try {
-            baseHelper.updateBase(base, records, false);
-            logger.info("Database successfully updated", { records: records });
-            // TODO: create static files of the databases
-            res.status(200).send({ message: "Database updated!" });
+            // stores the postings and saves them locally
+            storage.storePostings(postings).save(pendingFile);
+            logger.info("Postings successfully stored", {
+                postings: postings
+            });
+            res.status(200).send({
+                message: "Successful post!"
+            });
         } catch (err) {
-            logger.error("Unsuccessful database update", { err_message: err.message, data: records });
+            logger.error("Unsuccessful post", {
+                err_message: err.message,
+                data: postings
+            });
             res.status(500).send({
                 error: "Error on Server Side..."
             });
@@ -218,53 +270,46 @@ app.route('/api/v1/jobs')
     });
 
 // gets the location info of the queried jobs
-app.get('/api/v1/jobs/locations', function (req, res) {
-    formatRequest(req, res, format.toLocationFormat);
+app.get('/api/v1/jobs/locations', function(req, res) {
+    formatRequestSeveral(req, res, format.toLocationFormat);
 });
 
 // gets the skills info of the queried jobs
-app.get('/api/v1/jobs/skills', function (req, res) {
-    formatRequest(req, res, format.toSkillFormat);
+app.get('/api/v1/jobs/skills', function(req, res) {
+    formatRequestSeveral(req, res, format.toSkillFormat);
 });
 
 // gets the skills and location info of the queried jobs
-app.get('/api/v1/jobs/locations_and_skills', function (req, res) {
-    formatRequest(req, res, format.toLocationAndSkillFormat);
+app.get('/api/v1/jobs/locations_and_skills', function(req, res) {
+    formatRequestSeveral(req, res, format.toLocationAndSkillFormat);
 });
 
-///////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////
 // ID Record Routers
 
 // gets all info of the ID job
 app.get('/api/v1/jobs/:id', function(req, res) {
-    formatSingleJob(req, res, format.toAllInfoFormat);
+    formatRequestSingle(req, res, format.toAllInfoFormat);
 });
 
 // gets the location info of the ID job
-app.get('/api/v1/jobs/:id/locations', function (req, res) {
-    formatSingleJob(req, res, format.toLocationFormat);
+app.get('/api/v1/jobs/:id/locations', function(req, res) {
+    formatRequestSingle(req, res, format.toLocationFormat);
 });
 
 // gets the skills info of the ID job
-app.get('/api/v1/jobs/:id/skills', function (req, res) {
-    formatSingleJob(req, res, format.toSkillFormat);
+app.get('/api/v1/jobs/:id/skills', function(req, res) {
+    formatRequestSingle(req, res, format.toSkillFormat);
 });
 
 // gets the skills and location info of the ID job
-app.get('/api/v1/jobs/:id/locations_and_skills', function (req, res) {
-    formatSingleJob(req, res, format.toLocationAndSkillFormat);
+app.get('/api/v1/jobs/:id/locations_and_skills', function(req, res) {
+    formatRequestSingle(req, res, format.toLocationAndSkillFormat);
 });
 
-///////////////////////////////////////////////////////////////////
-// Lists of all skills, locations, countries and timeSeries
-
-app.get('/api/v1/stats/update', function (req, res) {
-    // update initialized data
-    init.update(base, true);
-    logger.info("Initialization data updated");
-    deletePendingFile();
-    res.status(200).end();
-});
+/////////////////////////////////////////////////
+// Lists of all skills, locations,
+// countries and timeSeries
 
 app.get('/api/v1/stats/count', function(req, res) {
     var initVal = init.getCount();
@@ -293,10 +338,10 @@ app.get('/api/v1/stats/lists/:length', function(req, res) {
 });
 
 
-///////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////
 // Run the server
 
-var PORT = process.env.npm_package_config_port;
+var PORT = 2510;
 app.listen(PORT, function() {
     console.log("JobAnalytics data server listening on port:", PORT);
 });
