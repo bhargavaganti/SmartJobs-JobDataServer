@@ -6,7 +6,6 @@ SETLOCAL ENABLEEXTENSIONS
 netstat -o -n -a | findstr 0.0:2510
 IF %ERRORLEVEL% EQU 0 (
     ECHO Updating database...
-    cd "C:\work\edsa\jobanalysis-dataserver\dev\"
     :: Restart the base
     node -e "var request = require('request'); request.get('http://localhost:2510/api/v1/database_update');"
 ) ELSE (
