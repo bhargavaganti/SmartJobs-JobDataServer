@@ -47,11 +47,11 @@ function InitData(_base) {
     var numOfSkills = _base.store("Skills").length;
     var numOfConcepts = _base.store("Concepts").length;
 
-    var skills = computeSkills(_base);
-    var locations = computeLocations(_base);
-    var countries = computeCountries(_base);
-    var timeSeries = computeTimeSeries(_base);
-    var concepts = computeConcepts(_base);
+    var skills = computeSkills(_base, true);
+    var locations = computeLocations(_base, true);
+    var countries = computeCountries(_base, true);
+    var timeSeries = computeTimeSeries(_base, true);
+    var concepts = computeConcepts(_base, true);
 
     /**
      * Updates the data.
@@ -171,9 +171,9 @@ function InitData(_base) {
                 var jobs1 = skill1.requiredForJobs.length;
                 var jobs2 = skill2.requiredForJobs.length;
                 if (jobs2 < jobs1) {
-                    return 1;
-                } else if (jobs2 > jobs1) {
                     return -1;
+                } else if (jobs2 > jobs1) {
+                    return 1;
                 } else {
                     return 0;
                 }
@@ -212,9 +212,9 @@ function InitData(_base) {
                 var jobs1 = loc1.foundJobs.length;
                 var jobs2 = loc2.foundJobs.length;
                 if (jobs2 < jobs1) {
-                    return 1;
-                } else if (jobs2 > jobs1) {
                     return -1;
+                } else if (jobs2 > jobs1) {
+                    return 1;
                 } else {
                     return 0;
                 }
@@ -251,9 +251,9 @@ function InitData(_base) {
                 var jobs1 = country1.foundJobs.length;
                 var jobs2 = country2.foundJobs.length;
                 if (jobs2 < jobs1) {
-                    return 1;
-                } else if (jobs2 > jobs1) {
                     return -1;
+                } else if (jobs2 > jobs1) {
+                    return 1;
                 } else {
                     return 0;
                 }
@@ -332,9 +332,9 @@ function InitData(_base) {
             timeSeries.forEach(function(day) {
                 day.skillset.sort(function(skill1, skill2) {
                     if (skill2.value < skill1.value) {
-                        return 1;
-                    } else if (skill2.value < skill1.value) {
                         return -1;
+                    } else if (skill2.value < skill1.value) {
+                        return 1;
                     } else {
                         return 0;
                     }
@@ -362,9 +362,9 @@ function InitData(_base) {
                 var jobs1 = concept1.foundForJobs.length;
                 var jobs2 = concept2.foundForJobs.length;
                 if (jobs2 < jobs1) {
-                    return 1;
-                } else if (jobs2 > jobs1) {
                     return -1;
+                } else if (jobs2 > jobs1) {
+                    return 1;
                 } else {
                     return 0;
                 }
@@ -505,9 +505,9 @@ function InitData(_base) {
                 var timestamp1 = (new Date(obj1.name)).getTime();
                 var timestamp2 = (new Date(obj2.name)).getTime();
                 if (timestamp1 < timestamp2) {
-                    return -1;
-                } else if (timestamp1 > timestamp2) {
                     return 1;
+                } else if (timestamp1 > timestamp2) {
+                    return -1;
                 } else {
                     return 0;
                 }
@@ -516,9 +516,9 @@ function InitData(_base) {
             array.forEach(function(day) {
                 day.skillset.sort(function(skill1, skill2) {
                     if (skill2.value < skill1.value) {
-                        return 1;
-                    } else if (skill2.value < skill1.value) {
                         return -1;
+                    } else if (skill2.value < skill1.value) {
+                        return 1;
                     } else {
                         return 0;
                     }
