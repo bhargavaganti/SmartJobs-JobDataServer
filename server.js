@@ -191,7 +191,7 @@ app.get('/api/v1/', function(req, res) {
 app.get('/api/v1/database_update', function(req, res) {
     try {
         console.time("Update");
-        
+
         ///////////////////////////////
         // updates the database
         var postings = storage.getPostings();
@@ -219,7 +219,7 @@ app.get('/api/v1/database_update', function(req, res) {
             dbPath: './data/db/'
         });
         // clear the storage
-        storage.clear().save(storage.getPendingPath());
+        storage.clear();
 
         ///////////////////////////////
         // updates init data
@@ -251,7 +251,7 @@ app.route('/api/v1/jobs')
         var postings = req.body;
         try {
             // stores the postings and saves them locally
-            storage.storePostings(postings).save(pendingFile);
+            storage.storePostings(postings);
             logger.info("Postings successfully stored", {
                 postings: postings
             });
