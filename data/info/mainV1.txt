@@ -10,25 +10,116 @@ Job Posts containing the Data Science (predefined) skillset that were published 
 
 The routes that are available:
 
+// JOB INFO
+
 POST /api/v1/jobs                           // POSTs the records to the bases
 GET  /api/v1/jobs                           // GETs the jobs info (requires query)
 GET  /api/v1/jobs/{id}                      // GETs the job with 'id' info
 
+    Returns an (array of) object
+    {
+        id: number,
+        timestamp: number,
+        date: string,
+        title: string,
+        organization: string,
+        description: string,
+        location_coord: [ number, number ],
+        location_city: string,
+        location_country: string,
+        skillset: [ string ]
+    }
+
+
 GET /api/v1/jobs/locations                  // GETs the jobs locations info (requires query)
 GET /api/v1/jobs/{id}/locations             // GETs the jobs with 'id' locations info
+
+    Returns an (array of) object
+    {
+        id: number,
+        location_coord: [ number, number ],
+        location_city: string,
+        location_country: string
+    }
+
 
 GET /api/v1/jobs/skills                     // GETs the jobs skills info (required query)
 GET /api/v1/jobs/{id}/skills                // GETs the jobs with 'id' skills info
 
+    Returns an (array of) object
+    {
+        id: number,
+        skillset: [ string ]
+    }
+
+
 GET /api/v1/jobs/locations_and_skills       // GETs the jobs location and skill info (requires query)
 GET /api/v1/jobs/{id}/locations_and_skills  // GETs the job with 'id' location and skill info
 
+
+    Returns an (array of) object
+    {
+        id: number,
+        timestamp: number,
+        location_coord: [ number, number ],
+        location_city: string,
+        location_country: string,
+        skillset: [ string ]
+    }
+
+
 GET /api/v1/stats/count                     // GETs the number count of jobs, skills and locations
+
+    Returns an object
+    {
+        numOfJobs: number,
+        numOfLocations: number,
+        numOfSkills: number
+    }
+
+
 GET /api/v1/stats/lists                     // GETs the whole arrays of skills, locations and countries with occurrences
 GET /api/v1/stats/lists/{length}            // GETs the top 'length' arrays of skills, locations and countries with occurrences
 
+    Returns an object
+    {
+        skills: {
+            count: number,
+            data: [
+                { name: string, value: number }
+            ]
+        },
+        locations: {
+            count: number,
+            data: [
+                { name: string, value: number }
+            ]
+        },
+        countries: {
+            count: number,
+            data: [
+                { name: string, value: number }
+            ]
+        }
+    }
+
+// JOB CONCEPTS
+
 GET /api/v1/concepts                        // GETs the concepts that are specified in the query (requires query)
+GET /api/v1/concepts/wiki                   // GETs the suggested jobs for specific wikified concepts (requires query)
 GET /api/v1/concepts/text_job_similarity    // GETs the jobs that contain at least one of the concepts found in the text (requires query)
+
+    Returns an object
+    {
+        count: number,
+        data: [
+            {
+                id: number,
+                weight: number,
+                concepts: [ string ]
+            }
+        ]
+    }
 
 
 ///////////////////////////////////////////////////////////
@@ -37,13 +128,16 @@ GET /api/v1/concepts/text_job_similarity    // GETs the jobs that contain at lea
 Here we present the query structure when calling the GET Routers
 (needed only for those that are specified above).
 
-There are two options:
 
+// JOB INFO
+
+There are two options:
 1. specify the job ids
     Here we query for jobs using their internal id.
     Example:
         /api/v1/jobs?id=1,100,8000
-        Will return the job info for jobs with ids 1, 100 and 8000
+
+        This will return the job info for jobs with ids 1, 100 and 8000
 
 2. specify skills, countries and/or locations
     Here we query using the specified skills, countries and locations (cities).
@@ -51,9 +145,21 @@ There are two options:
     uses the OR operator.
     Example:
         /api/v1/jobs?skills=javascript&skills=nodejs&locations=London&countries=Denmark
+
         This will query for jobs that require javascript AND nodejs and are
         located in London OR Denmark.
 
+
+// JOB CONCEPTS
+
+Here we specify the language and text we want to use for getting
+the concepts and the suggested jobs
+
+Example:
+    /api/v1/concepts/text_job_similarity?lang=en&text=This is a machine learning course.
+
+    This will return the jobs that contain at least one of the wikified concepts
+    that are found for the text "This is a machine learning course."
 
 ///////////////////////////////////////////////////////////
 // POSTING TO DATABASE
