@@ -4,35 +4,59 @@ The web API allows the user to query for Data Science Jobs, that have been found
 Adzuna API and were stored using the QMiner data analytics platform. It contains only the
 Job Posts containing the Data Science (predefined) skillset that were published in the EU.
 
-Possible methods:
+
+///////////////////////////////////////////////////////////
+// POSSIBLE ROUTES
+
+The routes that are available:
 
 POST /api/v1/jobs                           // POSTs the records to the bases
-GET  /api/v1/jobs                           // GETs the jobs info (required query)
+GET  /api/v1/jobs                           // GETs the jobs info (requires query)
 GET  /api/v1/jobs/{id}                      // GETs the job with 'id' info
 
-GET /api/v1/jobs/locations                  // GETs the jobs locations info (required query)
+GET /api/v1/jobs/locations                  // GETs the jobs locations info (requires query)
 GET /api/v1/jobs/{id}/locations             // GETs the jobs with 'id' locations info
 
 GET /api/v1/jobs/skills                     // GETs the jobs skills info (required query)
 GET /api/v1/jobs/{id}/skills                // GETs the jobs with 'id' skills info
 
-GET /api/v1/jobs/locations_and_skills       // GETs the jobs location and skill info (required query)
+GET /api/v1/jobs/locations_and_skills       // GETs the jobs location and skill info (requires query)
 GET /api/v1/jobs/{id}/locations_and_skills  // GETs the job with 'id' location and skill info
 
 GET /api/v1/stats/count                     // GETs the number count of jobs, skills and locations
 GET /api/v1/stats/lists                     // GETs the whole arrays of skills, locations and countries with occurrences
 GET /api/v1/stats/lists/{length}            // GETs the top 'length' arrays of skills, locations and countries with occurrences
 
+GET /api/v1/concepts                        // GETs the concepts that are specified in the query (requires query)
+GET /api/v1/concepts/text_job_similarity    // GETs the jobs that contain at least one of the concepts found in the text (requires query)
 
-To query please use the following data structure:
-var query = {
-    skills:    ['javascript', 'nodejs'],      // array of skills
-    countries: ['Denmark', 'United Kingdom'], // array of countries
-    locations: ['London', 'Berlin']           // array of locations/cities
-}
 
-or in url:
-/api/v1/jobs?skills=javascript&skills=nodejs&countries=Denmark
+///////////////////////////////////////////////////////////
+// QUERY AND CALLING ROUTES
+
+Here we present the query structure when calling the GET Routers
+(needed only for those that are specified above).
+
+There are two options:
+
+1. specify the job ids
+    Here we query for jobs using their internal id.
+    Example:
+        /api/v1/jobs?id=1,100,8000
+        Will return the job info for jobs with ids 1, 100 and 8000
+
+2. specify skills, countries and/or locations
+    Here we query using the specified skills, countries and locations (cities).
+    For skills it uses the AND operator and for locations and countries it
+    uses the OR operator.
+    Example:
+        /api/v1/jobs?skills=javascript&skills=nodejs&locations=London&countries=Denmark
+        This will query for jobs that require javascript AND nodejs and are
+        located in London OR Denmark.
+
+
+///////////////////////////////////////////////////////////
+// POSTING TO DATABASE
 
 For posting to the database, use the JSON structure:
 {
@@ -75,6 +99,10 @@ For posting to the database, use the JSON structure:
         }
     ]
 }
+
+
+///////////////////////////////////////////////////////////
+// FUTURE WORK
 
 Possible improvements:
  - Using joobles.org to crawl for more jobs published in the EU
