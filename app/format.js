@@ -45,8 +45,7 @@ exports.toAllInfoFormat = function (records) {
             skillset: skills.map(function (skill) { return skill.name; })
         };
     }
-
-    if (records instanceof qm.RecSet) {
+    if (records.length || records instanceof qm.RecSet) {
         var jobArray = records.map(function (job) {
             return allInfoFormat(job);
         });
@@ -92,7 +91,7 @@ exports.toLocationFormat = function (records) {
         };
     }
 
-    if (records instanceof qm.RecSet) {
+    if (records.length || records instanceof qm.RecSet) {
         var jobArray = records.map(function (job) {
             return locationFormat(job);
         });
@@ -129,7 +128,7 @@ exports.toSkillFormat = function (records) {
         };
     }
 
-    if (records instanceof qm.RecSet) {
+    if (records.length || records instanceof qm.RecSet) {
         var jobArray = records.map(function (job) {
             return skillFormat(job);
         });
@@ -176,7 +175,7 @@ exports.toLocationAndSkillFormat = function (records) {
         };
     }
 
-    if (records instanceof qm.RecSet) {
+    if (records.length || records instanceof qm.RecSet) {
         var jobArray = records.map(function (job) {
             return locationAndSkillFormat(job);
         });
@@ -193,5 +192,67 @@ exports.toLocationAndSkillFormat = function (records) {
         return locationAndSkillFormat(records);
     } else {
         throw "format.toLocationAndSkillsFormat: records is not a Record or RecordSet!";
+    }
+};
+
+/**
+ * Converts the record set to an array containing the timestamp, wikified concepts
+ * of the records.
+ * @param  {module:qm.Record | module:qm.RecordSet} records - The record(s).
+ * @return {Array.<Object>} The converted object array.
+ */
+exports.toWikiFormat = function (records) {
+    // changes the record to wiki format
+    function wikiFormat(record) {
+        var wiki = record.wikified;
+        var title = record.title.replace(/<\/?strong>/g, '');
+        title = title.replace(/&lt;\/?strong&gt;/g, '');
+        return {
+            id:  record.$id,
+            timestamp: Date.parse(record.date),
+            title: title,
+            description: record.description,
+            wikiset: wiki.map(function (wki) { return wki.name; })
+        };
+    }
+    var jobArray;
+    var data;
+    if (records.length || records instanceof qm.RecSet) {
+        jobArray = records.map(function (job) {
+            return wikiFormat(job);
+        });
+
+        // remove null occurrences
+        jobArray = jobArray.filter(function (rec) {
+            return rec !== null && rec !== undefined;
+        });
+        // add info to object
+        data = {
+            count: jobArray.length,
+            data: jobArray
+        };
+        return data;
+    } else {
+        jobArray = [];
+    	var sendLimit = 1000;
+
+	    if (records.length < sendLimit) {
+    		sendLimit = records.length;
+        }
+	    for (var j = 0; j < sendLimit; j++) {
+    		var job = wikiFormat(records[j]);
+    		jobArray.push(job);
+    	}
+
+    	// remove null occurrences
+        jobArray = jobArray.filter(function (rec) {
+            return rec !== null && rec !== undefined;
+        });
+        // add info to object
+        data = {
+            count: records.length,
+	        data: jobArray
+        };
+        return data;
     }
 };

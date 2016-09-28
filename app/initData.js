@@ -153,6 +153,20 @@ function InitData(_base) {
         };
     };
 
+        /**
+         * Gets the most `_limit` requested concepts.
+         * @param  {Number} [_limit] - The number of concepts requested.
+         * @return {Object} Object containing the 'count' and 'data' fields.
+         */
+        this.getConcepts = function(_limit) {
+            var limit = _limit === undefined ? concepts.length : _limit;
+            var slicedConcepts = concepts.slice(0, limit);
+            return {
+                count: slicedConcepts.length,
+                data:  slicedConcepts
+            };
+        };
+
     /////////////////////////////////////////////////////
     // initialization functions
     /**
