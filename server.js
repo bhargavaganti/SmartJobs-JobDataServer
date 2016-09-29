@@ -10,7 +10,6 @@ var fs = require('fs');
 var Client = require('node-rest-client').Client;
 var querystring = require('querystring');
 var cors = require("cors");
-var pug = require('pug');
 
 var app = express();
 // set static folder
@@ -265,104 +264,105 @@ function formatRequestSingle(req, res, formatStyle) {
 
 /////////////////////////////////////////////////
 // Wikifier functions
-function wikifyText(req, res) {
-	try {
-    	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
-    	var datas = {
-			'text': req.query.text,
-			'lang': req.query.lang,
-			'out': 'extendedJson',
-			'jsonForEval': 'true'
-		};
-    	endpoint += '?' + querystring.stringify(datas);
-        console.log(endpoint);
-    	var client = new Client();
-    	client.get(endpoint, function (data, response) {
-    		var annots = data.annotations;
-    		var wikiresult = {
-    			count: annots.length,
-    		annotations: annots
-            };
-    	    res.status(200).send(wikiresult);
-    	});
-	} catch (err) {
-	 logger.error("Unsuccessful format", {
-            err_message: err.message
-        });
-        res.status(500).send({
-            error: "Error on the Server Side..."
-        });
-	}
-}
+// function wikifyText(req, res) {
+// 	try {
+//     	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
+//     	var datas = {
+// 			'text': req.query.text,
+// 			'lang': req.query.lang,
+// 			'out': 'extendedJson',
+// 			'jsonForEval': 'true'
+// 		};
+//     	endpoint += '?' + querystring.stringify(datas);
+//         console.log(endpoint);
+//     	var client = new Client();
+//     	client.get(endpoint, function (data, response) {
+//     		var annots = data.annotations;
+//     		var wikiresult = {
+//     			count: annots.length,
+//     		annotations: annots
+//             };
+//     	    res.status(200).send(wikiresult);
+//     	});
+// 	} catch (err) {
+// 	 logger.error("Unsuccessful format", {
+//             err_message: err.message
+//         });
+//         res.status(500).send({
+//             error: "Error on the Server Side..."
+//         });
+// 	}
+// }
+//
+// function suggestJobs(req, res, formatStyle) {
+// 	try {
+//     	var endpoint="http://mustang.ijs.si:8095/annotate-article";
+//     	var datas = {
+// 			'text': req.query.text,
+// 			'lang': req.query.lang,
+// 			'out': 'extendedJson',
+// 			'jsonForEval': 'true'
+// 		};
+//     	endpoint += '?' + querystring.stringify(datas);
+//         console.log(endpoint);
+//     	var client = new Client();
+//     	client.get(endpoint, function (data, response) {
+//     		var annots = data.annotations;
+//     		console.log(annots);
+//     		var wikiresult = {
+//     			count: annots.length,
+//     			annotations: annots
+//             };
+//     		var anarray = [];
+//     		for (var an = 0; an < annots.length; an++) {
+//     			var ant = annots[an];
+//     			if (ant.title) {
+//                     anarray.push(ant.title);
+//                 }
+//     		}
+//     		var query = {
+//     			wiki: anarray
+//     		};
+//     		console.log('anquery:' + querystring.stringify(query));
+//
+//     		if (Object.keys(query).length === 0 && query instanceof Object) {
+//             	res.status(400).send({
+//                     error: "Empty Query Sent"
+//                 });
+//         	} else {
+//             	try {
+//                     // get the recordset
+//                     var answer = search.wikiQuery(query, base);
+//         			if (answer instanceof Array || answer instanceof qm.RecSet) {
+//                 		var jobs = formatStyle(answer);
+//                 		console.log("results size:" + answer.length);
+//                      	res.status(200).send(jobs);
+//                 	} else {
+//                         // invalid query info
+//                         res.status(400).send({
+//                             error: answer
+//                         });
+//         	        }
+//                 } catch (err) {
+//                     logger.error("Unsuccessful query", {
+//                         err_message: err.message,
+//                         data: query
+//                     });
+//                     res.status(500).send({
+//                         error: "Error on Server Side..."
+//                     });
+//                 }
+//             }
+//     	});
+// 	} catch (err) {
+//         res.status(500).send({
+//             error: "Error on the Server Side..."
+//         });
+// 	}
+// }
 
-function suggestJobs(req, res, formatStyle) {
-	try {
-    	var endpoint="http://mustang.ijs.si:8095/annotate-article";
-    	var datas = {
-			'text': req.query.text,
-			'lang': req.query.lang,
-			'out': 'extendedJson',
-			'jsonForEval': 'true'
-		};
-    	endpoint += '?' + querystring.stringify(datas);
-        console.log(endpoint);
-    	var client = new Client();
-    	client.get(endpoint, function (data, response) {
-    		var annots = data.annotations;
-    		console.log(annots);
-    		var wikiresult = {
-    			count: annots.length,
-    			annotations: annots
-            };
-    		var anarray = [];
-    		for (var an = 0; an < annots.length; an++) {
-    			var ant = annots[an];
-    			if (ant.title) {
-                    anarray.push(ant.title);
-                }
-    		}
-    		var query = {
-    			wiki: anarray
-    		};
-    		console.log('anquery:' + querystring.stringify(query));
-
-    		if (Object.keys(query).length === 0 && query instanceof Object) {
-            	res.status(400).send({
-                    error: "Empty Query Sent"
-                });
-        	} else {
-            	try {
-                    // get the recordset
-                    var answer = search.wikiQuery(query, base);
-        			if (answer instanceof Array || answer instanceof qm.RecSet) {
-                		var jobs = formatStyle(answer);
-                		console.log("results size:" + answer.length);
-                     	res.status(200).send(jobs);
-                	} else {
-                        // invalid query info
-                        res.status(400).send({
-                            error: answer
-                        });
-        	        }
-                } catch (err) {
-                    logger.error("Unsuccessful query", {
-                        err_message: err.message,
-                        data: query
-                    });
-                    res.status(500).send({
-                        error: "Error on Server Side..."
-                    });
-                }
-            }
-    	});
-	} catch (err) {
-        res.status(500).send({
-            error: "Error on the Server Side..."
-        });
-	}
-}
-
-/////////////////////////////////////////////////
+var wiki = require('./app/wiki');
+// /////////////////////////////////////////////////
 // Routers
 
 // Main page
@@ -504,7 +504,7 @@ app.get('/api/v1/jobs/:id/locations_and_skills', function(req, res) {
 //For VideoLectures
 // wikifies text
 app.get('/api/v1/concepts', function(req, res) {
-    wikifyText(req, res);
+    wiki.wikifyText(req, res);
 });
 
 // gets jobs based on concepts
@@ -514,7 +514,7 @@ app.get('/api/v1/concepts/wiki', function(req, res) {
 
 // suggests jobs based on text
 app.get('/api/v1/concepts/wikijobs', function(req, res) {
-    suggestJobs(req, res, format.toWikiFormat);
+    wiki.suggestJobs(req, res, format.toWikiFormat, base);
 });
 
 // suggest jobs based on text using concepts
@@ -588,90 +588,91 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
 	}
 });
 
-var fileCompiler = pug.compileFile("data/pug-template/videolectures-edsa-jobs.jade", {
-    pretty: true
-});
+// render html for videolectures
+var htmlRender = require('./app/htmlTemplate');
 
-app.get('/api/v1/render_jobs', function (req, res) {
-    var html = fileCompiler({
-        categories: [],
-        job_concepts: 100
+
+app.route('/api/v1/render_jobs')
+    .get(function (req, res) {
+        var html = htmlRender({
+            categories: [],
+            job_concepts: 100
+        });
+        res.send(html);
+    })
+    .post(function (req, res) {
+        try {
+            console.log(req.body);
+            // wikify text
+        	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
+        	var datas = {
+    			'text': req.body.text,
+    			'lang': req.body.lang,
+    			'out': 'extendedJson',
+    			'jsonForEval': 'true'
+    		};
+        	endpoint += '?' + querystring.stringify(datas);
+        	var client = new Client();
+        	client.get(endpoint, function (data, response) {
+        		var annots = data.annotations;
+                // create a "fake" record containing the wikified concepts
+                var record = { wikified: [] };
+                for (var annN = 0; annN < data.annotations.length; annN++) {
+                    var concept = data.annotations[annN].title;
+                    if (jobConcepts.indexOf(concept) > -1) {
+                        record.wikified.push({ $name: concept });
+                    }
+                }
+                if (record.wikified.length === 0) {
+                    // there are no existing wikified concepts so there
+                    // are no existing jobs that are similar by concept
+                    res.status(200).send({
+                        count: 0,
+                        data: []
+                    });
+                } else {
+                    // the wikified concepts exist so there is at
+                    // least one job that is similar by concept
+                    var lectureRec = base.store("JobPostings").newRecord(record);
+                    var spVec = ftrSpace.extractSparseVector(lectureRec);
+                    // for each job get the number of concepts that are the same with lectureRec
+                    var occurenceVec = spConceptMat.multiplyT(spVec);
+                    if (spVec.nnz !== 0) {
+                        occurenceVec = occurenceVec.multiply(1/spVec.nnz);
+                    }
+                    // get the relevant job and return id, weight and concepts
+                    var relevantJobs = [];
+                    for (var vecIdx = 0; vecIdx < occurenceVec.length; vecIdx++) {
+                        var relevance = occurenceVec.at(vecIdx);
+                        if (relevance !== 0) {
+                            var jobPosting = recentRecords[vecIdx];
+                            relevantJobs.push({
+                                id: jobPosting.$id,
+                                weight: relevance
+                            });
+                        }
+                    }
+                    var html = htmlRender({
+                        categories: [],
+                        job_concepts: 100
+                    });
+
+                    res.status(200).send(html);
+
+                }
+        	});
+    	} catch (err) {
+    	 logger.error("Unsuccessful format", {
+                err_message: err.message
+            });
+            res.status(500).send({
+                error: "Error on the Server Side..."
+            });
+    	}
+
+
+
     });
-    res.send(html);
-});
-
-app.post('/api/v1/render_jobs', function (req, res) {
-    // try {
-    //     // wikify text
-    // 	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
-    // 	var datas = {
-	// 		'text': req.body.text,
-	// 		'lang': req.body.lang,
-	// 		'out': 'extendedJson',
-	// 		'jsonForEval': 'true'
-	// 	};
-    // 	endpoint += '?' + querystring.stringify(datas);
-    // 	var client = new Client();
-    // 	client.get(endpoint, function (data, response) {
-    // 		var annots = data.annotations;
-    //         // create a "fake" record containing the wikified concepts
-    //         var record = { wikified: [] };
-    //         for (var annN = 0; annN < data.annotations.length; annN++) {
-    //             var concept = data.annotations[annN].title;
-    //             if (jobConcepts.indexOf(concept) > -1) {
-    //                 record.wikified.push({ $name: concept });
-    //             }
-    //         }
-    //         if (record.wikified.length === 0) {
-    //             // there are no existing wikified concepts so there
-    //             // are no existing jobs that are similar by concept
-    //             res.status(200).send({
-    //                 count: 0,
-    //                 data: []
-    //             });
-    //         } else {
-    //             // the wikified concepts exist so there is at
-    //             // least one job that is similar by concept
-    //             var lectureRec = base.store("JobPostings").newRecord(record);
-    //             var spVec = ftrSpace.extractSparseVector(lectureRec);
-    //             // for each job get the number of concepts that are the same with lectureRec
-    //             var occurenceVec = spConceptMat.multiplyT(spVec);
-    //             if (spVec.nnz !== 0) {
-    //                 occurenceVec = occurenceVec.multiply(1/spVec.nnz);
-    //             }
-    //             // get the relevant job and return id, weight and concepts
-    //             var relevantJobs = [];
-    //             for (var vecIdx = 0; vecIdx < occurenceVec.length; vecIdx++) {
-    //                 var relevance = occurenceVec.at(vecIdx);
-    //                 if (relevance !== 0) {
-    //                     var jobPosting = recentRecords[vecIdx];
-    //                     relevantJobs.push({
-    //                         id: jobPosting.$id,
-    //                         weight: relevance
-    //                     });
-    //                 }
-    //             }
-    //
-    //
-    //         }
-    // 	});
-	// } catch (err) {
-	//  logger.error("Unsuccessful format", {
-    //         err_message: err.message
-    //     });
-    //     res.status(500).send({
-    //         error: "Error on the Server Side..."
-    //     });
-	// }
-
-    var html = fileCompiler({
-        categories: [],
-        job_concepts: 100
-    });
-
-    res.status(200).send(html);
-
-});
 
 // suggest jobs based on text using concepts
 app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
