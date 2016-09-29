@@ -582,6 +582,79 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
 	}
 });
 
+
+// suggest jobs based on text using concepts
+app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
+    try {
+        // wikify text
+    	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
+    	var datas = {
+			'text': req.body.text,
+			'lang': req.body.lang,
+			'out': 'extendedJson',
+			'jsonForEval': 'true'
+		};
+    	endpoint += '?' + querystring.stringify(datas);
+    	var client = new Client();
+    	client.get(endpoint, function (data, response) {
+    		var annots = data.annotations;
+            // create a "fake" record containing the wikified concepts
+            var record = { wikified: [] };
+            for (var annN = 0; annN < data.annotations.length; annN++) {
+                var concept = data.annotations[annN].title;
+                if (jobConcepts.indexOf(concept) > -1) {
+                    record.wikified.push({ $name: concept });
+                }
+            }
+            if (record.wikified.length === 0) {
+                // there are no existing wikified concepts so there
+                // are no existing jobs that are similar by concept
+                res.status(200).send({
+                    count: 0,
+                    data: []
+                });
+            } else {
+                // the wikified concepts exist so there is at
+                // least one job that is similar by concept
+                var lectureRec = base.store("JobPostings").newRecord(record);
+                var spVec = ftrSpace.extractSparseVector(lectureRec);
+                // for each job get the number of concepts that are the same with lectureRec
+                var occurenceVec = spConceptMat.multiplyT(spVec);
+                if (spVec.nnz !== 0) {
+                    occurenceVec = occurenceVec.multiply(1/spVec.nnz);
+                }
+                // get the relevant job and return id, weight and concepts
+                var relevantJobs = [];
+                for (var vecIdx = 0; vecIdx < occurenceVec.length; vecIdx++) {
+                    var relevance = occurenceVec.at(vecIdx);
+                    if (relevance !== 0) {
+                        var jobPosting = recentRecords[vecIdx];
+                        relevantJobs.push({
+                            id: jobPosting.$id,
+                            weight: relevance,
+                            concepts: jobPosting.wikified.map(function (con) {
+                                return con.name;
+                            })
+                        });
+                    }
+                }
+        	    res.status(200).send({
+                    count: relevantJobs.length,
+                    data: relevantJobs
+                });
+            }
+    	});
+	} catch (err) {
+	 logger.error("Unsuccessful format", {
+            err_message: err.message
+        });
+        res.status(500).send({
+            error: "Error on the Server Side..."
+        });
+	}
+});
+
+
 /////////////////////////////////////////////////
 // Lists of all skills, locations,
 // countries and timeSeries
