@@ -559,10 +559,10 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
                         var jobPosting = recentRecords[vecIdx];
                         relevantJobs.push({
                             id: jobPosting.$id,
-                            weight: relevance,
-                            concepts: jobPosting.wikified.map(function (con) {
-                                return con.name;
-                            })
+                            weight: relevance
+                            // concepts: jobPosting.wikified.map(function (con) {
+                            //     return con.name;
+                            // })
                         });
                     }
                 }
@@ -631,10 +631,10 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
                         var jobPosting = recentRecords[vecIdx];
                         relevantJobs.push({
                             id: jobPosting.$id,
-                            weight: relevance,
-                            concepts: jobPosting.wikified.map(function (con) {
-                                return con.name;
-                            })
+                            weight: relevance
+                            // concepts: jobPosting.wikified.map(function (con) {
+                            //     return con.name;
+                            // })
                         });
                     }
                 }
