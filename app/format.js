@@ -283,7 +283,8 @@ exports.toSkillHtmlString = function (str, skillArray) {
 
     // function body
     var lectureCategories = [];
-    str.split(/[\n>]+/g).each(function (category) {
+    var categ = str.split(/[\n>]+/g);
+    categ.forEach(function (category) {
         if (lectureCategories.indexOf(category) === -1) {
             lectureCategories.push(category);
         }
@@ -294,7 +295,7 @@ exports.toSkillHtmlString = function (str, skillArray) {
         var idx = arrayObjectIndexOf(skillArray, category, "name");
         if (idx > -1) {
             var text = "<a href='http://jobs.videolectures.net/jobseekers?q=" + skillArray[idx].name + "'>" +
-                        skillArray[idx].value + "</a>" + " jobs found in " + category;
+                        skillArray[idx].value + "</a>" + " jobs found in " + lectureCategories[i];
             content.push(text);
         }
     }

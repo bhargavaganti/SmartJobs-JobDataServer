@@ -425,12 +425,13 @@ app.get('/api/v1/concepts/wikijobs', function(req, res) {
 app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
     try {
         // wikify text
-    	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
+    	var endpoint = "http://wikifier.org/annotate-article";
     	var datas = {
 			'text': req.query.text,
 			'lang': req.query.lang,
 			'out': 'extendedJson',
-			'jsonForEval': 'true'
+			'jsonForEval': 'true',
+            userKey: 'usppmjvabjnzltltvihvylppekbiuf'
 		};
     	endpoint += '?' + querystring.stringify(datas);
     	var client = new Client();
@@ -507,17 +508,18 @@ app.route('/api/v1/render_jobs')
     .post(function (req, res) {
         try {
             var body = req.body;
+            console.log(body);
             var options = {
                 categories: format.toSkillHtmlString(body.categories, init.getSkills().data)
             };
-
             // wikify text
-        	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
+        	var endpoint = "http://wikifier.org/annotate-article";
         	var datas = {
-    			'text': body.title + " " + body.text,
-    			'lang': body.lang,
+    			'text': req.query.text,
+    			'lang': req.query.lang,
     			'out': 'extendedJson',
-    			'jsonForEval': 'true'
+    			'jsonForEval': 'true',
+                userKey: 'usppmjvabjnzltltvihvylppekbiuf'
     		};
         	endpoint += '?' + querystring.stringify(datas);
         	var client = new Client();
@@ -531,13 +533,12 @@ app.route('/api/v1/render_jobs')
                         record.wikified.push({ $name: concept });
                     }
                 }
+                var html;
                 if (record.wikified.length === 0) {
                     // there are no existing wikified concepts so there
                     // are no existing jobs that are similar by concept
-                    res.status(200).send({
-                        count: 0,
-                        data: []
-                    });
+                    html = htmlRender(options);
+                    res.status(200).send(html);
                 } else {
                     // the wikified concepts exist so there is at
                     // least one job that is similar by concept
@@ -555,11 +556,8 @@ app.route('/api/v1/render_jobs')
                         }
                     }
                     options.job_concepts = format.toConceptHtmlString(relevantId);
-
-                    var html = htmlRender(options);
-
+                    html = htmlRender(options);
                     res.status(200).send(html);
-
                 }
         	});
     	} catch (err) {
@@ -579,12 +577,13 @@ app.route('/api/v1/render_jobs')
 app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
     try {
         // wikify text
-    	var endpoint = "http://mustang.ijs.si:8095/annotate-article";
+    	var endpoint = "http://wikifier.org/annotate-article";
     	var datas = {
-			'text': req.body.text,
-			'lang': req.body.lang,
+			'text': req.query.text,
+			'lang': req.query.lang,
 			'out': 'extendedJson',
-			'jsonForEval': 'true'
+			'jsonForEval': 'true',
+            userKey: 'usppmjvabjnzltltvihvylppekbiuf'
 		};
     	endpoint += '?' + querystring.stringify(datas);
     	var client = new Client();
