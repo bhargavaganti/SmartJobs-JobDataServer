@@ -674,6 +674,11 @@ app.get('/api/v1/stats/lists', function(req, res) {
     res.status(200).send(initVal);
 });
 
+app.get('/api/v1/stats/lists/skills', function(req, res) {
+    res.status(200).send(init.getSkills());
+});
+
+
 app.get('/api/v1/stats/lists/:length', function(req, res) {
     var length = req.params.length;
     var initVal = {
