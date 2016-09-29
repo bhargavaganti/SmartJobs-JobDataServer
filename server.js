@@ -9,17 +9,20 @@ var winston = require('winston');
 var fs = require('fs');
 var Client = require('node-rest-client').Client;
 var querystring = require('querystring');
-
+var cors = require("cors");
 var pug = require('pug');
 
 var app = express();
 // set static folder
 app.set('view engine', 'jade');
+app.options("*", cors())
+    .use(cors());
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({
     extended: true // for parsing application/x-www-form-urlencoded
 }));
+
 
 app.disable('x-powered-by');
 
