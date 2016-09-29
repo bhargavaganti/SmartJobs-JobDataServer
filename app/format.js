@@ -256,3 +256,52 @@ exports.toWikiFormat = function (records) {
         return data;
     }
 };
+
+/**
+ * Returns the string containing the the category/skill name and its job count.
+ * @param {string} str - String of VL categories.
+ * @param {Array.<Object>} skillArray - Array of skill name and count.
+ * @return {string} Html string containing the links and category count.
+ */
+exports.toSkillHtmlString = function (str, skillArray) {
+    /**
+     * Gets the index of the object in the array for
+     * the object with property 'property' and value 'val'.
+     * @param  {Array.<Object>} _array - The Object array.
+     * @param  {Object} val            - Searched value.
+     * @param  {String} property       - The property of the objects.
+     * @return {Number} The index of of the found object in the array.
+     */
+    function arrayObjectIndexOf(_array, val, property) {
+        for (var idx = 0; idx < _array.length; idx++) {
+            if (_array[idx][property] === val) {
+                return idx;
+            }
+        }
+        return -1;
+    }
+
+    // function body
+    var lectureCategories = [];
+    str.split(/[\n>]+/g).each(function (category) {
+        if (lectureCategories.indexOf(category) === -1) {
+            lectureCategories.push(category);
+        }
+    });
+    var content = [];
+    for (var i = 0; i < lectureCategories.length; i++) {
+        var category = lectureCategories[i].toLowerCase().replace(/[ ]+/g, "-");
+        var idx = arrayObjectIndexOf(skillArray, category, "name");
+        if (idx > -1) {
+            var text = "<a href='http://jobs.videolectures.net/jobseekers?q=" + skillArray[idx].name + "'>" +
+                        skillArray[idx].value + "</a>" + " jobs found in " + category;
+            content.push(text);
+        }
+    }
+    return content.join(", ");
+};
+
+exports.toConceptHtmlString = function (idArray) {
+    var text = "<a href='http://jobs.videolectures.net/jobseekers?id=" + idArray.join(",") + "'>" +
+                idArray.length + " jobs related to the lecture";
+};
