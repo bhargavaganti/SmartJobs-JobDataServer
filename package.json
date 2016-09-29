@@ -9,6 +9,7 @@
     "file-stream-rotator": "0.0.7",
     "morgan": "^1.7.0",
     "node-rest-client": "^2.0.1",
+    "pug": "^0.1.0",
     "qminer": "^6.2.0",
     "querystring": "^0.2.0",
     "winston": "^2.2.0",
