@@ -500,8 +500,8 @@ var htmlRender = require('./app/htmlTemplate');
 app.route('/api/v1/render_jobs')
     .get(function (req, res) {
         var html = htmlRender({
-            categories: [],
-            job_concepts: 100
+            categories:  [{ url: "nekaj", count: 100, name: "This" }, { url: "nekaj", count: 100, name: "This" }, { url: "nekaj", count: 100, name: "This" }],
+            job_concepts: { url: "other", count: 100 }
         });
         res.send(html);
     })

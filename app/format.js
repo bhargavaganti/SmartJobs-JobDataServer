@@ -263,7 +263,7 @@ exports.toWikiFormat = function (records) {
  * @param {Array.<Object>} skillArray - Array of skill name and count.
  * @return {string} Html string containing the links and category count.
  */
-exports.toSkillHtmlString = function (str, skillArray) {
+exports.toSkillHtmlObjects = function (str, skillArray) {
     /**
      * Gets the index of the object in the array for
      * the object with property 'property' and value 'val'.
@@ -294,15 +294,21 @@ exports.toSkillHtmlString = function (str, skillArray) {
         var category = lectureCategories[i].toLowerCase().replace(/[ ]+/g, "-");
         var idx = arrayObjectIndexOf(skillArray, category, "name");
         if (idx > -1) {
-            var text = "<a href='http://jobs.videolectures.net/jobseekers?q=" + skillArray[idx].name + "'>" +
-                        skillArray[idx].value + "</a>" + " jobs found in " + lectureCategories[i];
-            content.push(text);
+            var obj = {
+                url: "http://jobs.videolectures.net/jobseekers?q=" + skillArray[idx].name,
+                count: skillArray[idx].value,
+                name: lectureCategories[i]
+            };
+            content.push(obj);
         }
     }
-    return content.join(", ");
+    return content;
 };
 
 exports.toConceptHtmlString = function (idArray) {
-    var text = "<a href='http://jobs.videolectures.net/jobseekers?id=" + idArray.join(",") + "'>" +
-                idArray.length + " jobs related to the lecture";
+    var obj = {
+        url: "http://jobs.videolectures.net/jobseekers?id=" + idArray.join(","),
+        count: idArray.length
+    };
+    return obj;
 };
