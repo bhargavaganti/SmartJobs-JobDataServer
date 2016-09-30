@@ -83,9 +83,6 @@ if (!fs.existsSync(pendingDirectory)) {
 
 
 app.use(function(req, res, next){
-    req.socket.on('timeout', function() {
-        res.status(504).send('Connection timeout');
-    });
     req.socket.on('error', function(err) {
         res.status(504).send('Connection timeout');
     });
