@@ -305,10 +305,13 @@ exports.toSkillHtmlObjects = function (str, skillArray) {
     return content;
 };
 
-exports.toConceptHtmlString = function (idArray) {
-    var obj = {
-        url: "http://jobs.videolectures.net/jobseekers?id=" + idArray.join(","),
-        count: idArray.length
-    };
+exports.toConceptHtmlObject = function (idArray) {
+    var obj = null;
+    if (idArray.length > 0) {
+        obj = {
+            url: "http://jobs.videolectures.net/jobseekers?id=" + idArray.join(","),
+            count: idArray.length
+        };
+    }
     return obj;
 };

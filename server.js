@@ -508,15 +508,14 @@ app.route('/api/v1/render_jobs')
     .post(function (req, res) {
         try {
             var body = req.body;
-            console.log(body);
             var options = {
-                categories: format.toSkillHtmlString(body.categories, init.getSkills().data)
+                categories: format.toSkillHtmlObjects(body.categories, init.getSkills().data)
             };
             // wikify text
         	var endpoint = "http://wikifier.org/annotate-article";
         	var datas = {
-    			'text': req.query.text,
-    			'lang': req.query.lang,
+    			'text': body.title + " " + body.text,
+    			'lang': body.lang,
     			'out': 'extendedJson',
     			'jsonForEval': 'true',
                 userKey: 'usppmjvabjnzltltvihvylppekbiuf'
@@ -555,7 +554,7 @@ app.route('/api/v1/render_jobs')
                             relevantId.push(jobPosting.$id);
                         }
                     }
-                    options.job_concepts = format.toConceptHtmlString(relevantId);
+                    options.job_concepts = format.toConceptHtmlObject(relevantId);
                     html = htmlRender(options);
                     res.status(200).send(html);
                 }
@@ -579,8 +578,8 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
         // wikify text
     	var endpoint = "http://wikifier.org/annotate-article";
     	var datas = {
-			'text': req.query.text,
-			'lang': req.query.lang,
+			'text': req.body.title + " " + req.body.text,
+			'lang': req.body.lang,
 			'out': 'extendedJson',
 			'jsonForEval': 'true',
             userKey: 'usppmjvabjnzltltvihvylppekbiuf'
@@ -623,9 +622,6 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
                         relevantJobs.push({
                             id: jobPosting.$id,
                             weight: relevance
-                            // concepts: jobPosting.wikified.map(function (con) {
-                            //     return con.name;
-                            // })
                         });
                     }
                 }

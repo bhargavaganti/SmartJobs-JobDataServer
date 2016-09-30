@@ -2,11 +2,11 @@
     <h4>EDSA Videolectures Job Search</h4>
     <p>
         {{ #job_concepts }}
-        <a href={{ url }}>{{ count }}</a> jobs found related to the lecture
+        <a href={{ job_concepts.url }}>{{ job_concepts.count }}</a> jobs found related to the lecture
         {{ /job_concepts }}
     </p>
     <div>
-        <ul style="list-style-type:none;padding:0; margin:0;">
+        <ul style="list-style-type:none; padding:0; margin:0;">
             {{ #categories }}
             <li><a href={{ url }}>{{ count }}</a> jobs found in {{ name }}</li>
             {{ /categories }}
