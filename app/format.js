@@ -309,7 +309,7 @@ exports.toConceptHtmlObject = function (idArray) {
     var obj = null;
     if (idArray.length > 0) {
         obj = {
-            url: "http://jobs.videolectures.net/jobseekers?id=" + idArray.join(","),
+            url: "http://jobs.videolectures.net/jobseekers?id=" + idArray.slice(0, 100).join(","),
             count: idArray.length
         };
     }

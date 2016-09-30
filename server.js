@@ -15,15 +15,15 @@ var app = express();
 // set static folder
 app.set('view engine', 'jade');
 app.options("*", cors())
-    .use(cors());
-app.use(express.static(__dirname + '/public'));
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({
-    extended: true // for parsing application/x-www-form-urlencoded
-}));
-
+    .use(cors())
+    .use(express.static(__dirname + '/public'))
+    .use(bodyParser.json({limit: '50mb'}))
+    .use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 app.disable('x-powered-by');
+
+
+
 
 /////////////////////////////////////////////////
 // Logger and file system init
@@ -80,6 +80,18 @@ var pendingFile = path.join(pendingDirectory, 'pending.json');
 if (!fs.existsSync(pendingDirectory)) {
     fs.mkdirSync(pendingDirectory);
 }
+
+
+app.use(function(req, res, next){
+    req.socket.on('timeout', function() {
+        res.status(504).send('Connection timeout');
+    });
+    req.socket.on('error', function(err) {
+        res.status(504).send('Connection timeout');
+    });
+    next();
+});
+
 
 /////////////////////////////////////////////////
 // QMiner functionality
@@ -471,9 +483,6 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
                         relevantJobs.push({
                             id: jobPosting.$id,
                             weight: relevance
-                            // concepts: jobPosting.wikified.map(function (con) {
-                            //     return con.name;
-                            // })
                         });
                     }
                 }
@@ -499,6 +508,7 @@ var htmlRender = require('./app/htmlTemplate');
 
 app.route('/api/v1/render_jobs')
     .get(function (req, res) {
+        // TODO: cahnge this
         var html = htmlRender({
             categories:  [{ url: "nekaj", count: 100, name: "This" }, { url: "nekaj", count: 100, name: "This" }, { url: "nekaj", count: 100, name: "This" }],
             job_concepts: { url: "other", count: 100 }
