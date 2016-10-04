@@ -83,8 +83,13 @@ if (!fs.existsSync(pendingDirectory)) {
 
 
 app.use(function(req, res, next){
+    req.socket.on('timeout', function() {
+        res.status(504).send('Connection timeout');
+        return;
+    });
     req.socket.on('error', function(err) {
         res.status(504).send('Connection timeout');
+        return;
     });
     next();
 });
@@ -446,10 +451,13 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
     	var client = new Client();
     	client.get(endpoint, function (data, response) {
     		var annots = data.annotations;
+            if (!annots) {
+                res.status(500).end();
+            }
             // create a "fake" record containing the wikified concepts
             var record = { wikified: [] };
-            for (var annN = 0; annN < data.annotations.length; annN++) {
-                var concept = data.annotations[annN].title;
+            for (var annN = 0; annN < annots.length; annN++) {
+                var concept = annots[annN].title;
                 if (jobConcepts.indexOf(concept) > -1) {
                     record.wikified.push({ $name: concept });
                 }
@@ -531,10 +539,13 @@ app.route('/api/v1/render_jobs')
         	var client = new Client();
         	client.get(endpoint, function (data, response) {
         		var annots = data.annotations;
+                if (!annots) {
+                    res.status(500).end();
+                }
                 // create a "fake" record containing the wikified concepts
                 var record = { wikified: [] };
-                for (var annN = 0; annN < data.annotations.length; annN++) {
-                    var concept = data.annotations[annN].title;
+                for (var annN = 0; annN < annots.length; annN++) {
+                    var concept = annots[annN].title;
                     if (jobConcepts.indexOf(concept) > -1) {
                         record.wikified.push({ $name: concept });
                     }
@@ -595,6 +606,9 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
     	var client = new Client();
     	client.get(endpoint, function (data, response) {
     		var annots = data.annotations;
+            if (!annots) {
+                res.status(500).end();
+            }
             // create a "fake" record containing the wikified concepts
             var record = { wikified: [] };
             for (var annN = 0; annN < data.annotations.length; annN++) {
