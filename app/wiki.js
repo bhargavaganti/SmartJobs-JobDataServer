@@ -26,11 +26,13 @@ function wikifyText(req, res) {
     		    annotations: annots
             };
     	    res.status(200).send(wikiresult);
+			return;
     	});
 	} catch (err) {
         res.status(500).send({
             error: "Error on the Server Side..."
         });
+		return;
 	}
 }
 
@@ -73,11 +75,13 @@ function suggestJobs(req, res, formatStyle, base) {
     			if (answer instanceof Array || answer instanceof qm.RecSet) {
             		var jobs = formatStyle(answer);
                  	res.status(200).send(jobs);
+					return;
             	} else {
                     // invalid query info
                     res.status(400).send({
                         error: answer
                     });
+					return;
     	        }
             }
     	});
@@ -85,6 +89,7 @@ function suggestJobs(req, res, formatStyle, base) {
         res.status(500).send({
             error: "Error on Server Side..."
         });
+		return;
 	}
 }
 

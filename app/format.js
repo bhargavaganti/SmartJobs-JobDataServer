@@ -295,7 +295,7 @@ exports.toSkillHtmlObjects = function (str, skillArray) {
         var idx = arrayObjectIndexOf(skillArray, category, "name");
         if (idx > -1) {
             var obj = {
-                url: "http://jobs.videolectures.net/jobseekers?q=" + skillArray[idx].name,
+                url: "http://localhost:2409/jobseekers?q=" + skillArray[idx].name,
                 count: skillArray[idx].value,
                 name: lectureCategories[i]
             };
@@ -309,7 +309,7 @@ exports.toConceptHtmlObject = function (idArray) {
     var obj = null;
     if (idArray.length > 0) {
         obj = {
-            url: "http://jobs.videolectures.net/jobseekers?id=" + idArray.slice(0, 100).join(","),
+            url: "http://localhost:2409/jobseekers?id=" + idArray.slice(0, 100).join(","),
             count: idArray.length
         };
     }

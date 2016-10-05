@@ -188,11 +188,13 @@ function formatRequestSeveral(req, res, formatStyle) {
             if (answer instanceof qm.RecSet) {
                 var jobs = formatStyle(answer);
                 res.status(200).send(jobs);
+                return;
             } else {
                 // invalid query info
                 res.status(400).send({
                     error: answer
                 });
+                return;
             }
         } catch (err) {
             logger.error("Unsuccessful query", {
@@ -202,6 +204,7 @@ function formatRequestSeveral(req, res, formatStyle) {
             res.status(500).send({
                 error: "Error on Server Side..."
             });
+            return;
         }
     }
 }
@@ -228,11 +231,13 @@ function formatRequestWiki(req, res, formatStyle) {
         		var jobs = formatStyle(answer);
         		console.log("results size:" + answer.length);
              	res.status(200).send(jobs);
+                return;
         	} else {
                 // invalid query info
                 res.status(400).send({
                     error: answer
                 });
+                return;
 	        }
         } catch (err) {
             logger.error("Unsuccessful query", {
@@ -242,6 +247,7 @@ function formatRequestWiki(req, res, formatStyle) {
             res.status(500).send({
                 error: "Error on Server Side..."
             });
+            return;
         }
     }
 }
@@ -260,10 +266,12 @@ function formatRequestSingle(req, res, formatStyle) {
         if (record instanceof Object /* qm.Record */ ) {
             var job = formatStyle(record);
             res.status(200).send(job);
+            return;
         } else {
             res.status(400).send({
                 error: "No Job with sprecified ID found: " + id,
             });
+            return;
         }
     } catch (err) {
         logger.error("Unsuccessful format", {
@@ -273,6 +281,7 @@ function formatRequestSingle(req, res, formatStyle) {
         res.status(500).send({
             error: "Error on the Server Side..."
         });
+        return;
     }
 }
 
@@ -289,6 +298,7 @@ app.get('/api/v1/', function(req, res) {
     res.status(200).sendFile('data/info/mainV1.txt', {
         root: __dirname
     });
+    return;
 });
 
 // closes and restarts the base (it stores the data)
@@ -342,6 +352,7 @@ app.get('/api/v1/database_update', function(req, res) {
         res.status(200).send({
             message: "Successful update"
         });
+        return;
     } catch (err) {
         logger.error("Unsucessful Database update", {
             err_message: err.message
@@ -349,6 +360,7 @@ app.get('/api/v1/database_update', function(req, res) {
         res.status(500).send({
             message: "Unsuccessful update"
         });
+        return;
     }
 });
 
@@ -369,6 +381,7 @@ app.route('/api/v1/jobs')
             res.status(200).send({
                 message: "Successful post!"
             });
+            return;
         } catch (err) {
             logger.error("Unsuccessful post", {
                 err_message: err.message,
@@ -377,6 +390,7 @@ app.route('/api/v1/jobs')
             res.status(500).send({
                 error: "Error on Server Side..."
             });
+            return;
         }
     });
 
@@ -453,6 +467,7 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
     		var annots = data.annotations;
             if (!annots) {
                 res.status(500).end();
+                return;
             }
             // create a "fake" record containing the wikified concepts
             var record = { wikified: [] };
@@ -469,6 +484,7 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
                     count: 0,
                     data: []
                 });
+                return;
             } else {
                 // the wikified concepts exist so there is at
                 // least one job that is similar by concept
@@ -495,6 +511,7 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
                     count: relevantJobs.length,
                     data: relevantJobs
                 });
+                return;
             }
     	});
 	} catch (err) {
@@ -504,6 +521,7 @@ app.get('/api/v1/concepts/text_job_similarity', function(req, res) {
         res.status(500).send({
             error: "Error on the Server Side..."
         });
+        return;
 	}
 });
 
@@ -519,6 +537,7 @@ app.route('/api/v1/render_jobs')
             job_concepts: { url: "other", count: 100 }
         });
         res.send(html);
+        return;
     })
     .post(function (req, res) {
         try {
@@ -541,6 +560,7 @@ app.route('/api/v1/render_jobs')
         		var annots = data.annotations;
                 if (!annots) {
                     res.status(500).end();
+                    return;
                 }
                 // create a "fake" record containing the wikified concepts
                 var record = { wikified: [] };
@@ -556,6 +576,7 @@ app.route('/api/v1/render_jobs')
                     // are no existing jobs that are similar by concept
                     html = htmlRender(options);
                     res.status(200).send(html);
+                    return;
                 } else {
                     // the wikified concepts exist so there is at
                     // least one job that is similar by concept
@@ -575,6 +596,7 @@ app.route('/api/v1/render_jobs')
                     options.job_concepts = format.toConceptHtmlObject(relevantId);
                     html = htmlRender(options);
                     res.status(200).send(html);
+                    return;
                 }
         	});
     	} catch (err) {
@@ -584,6 +606,7 @@ app.route('/api/v1/render_jobs')
             res.status(500).send({
                 error: "Error on the Server Side..."
             });
+            return;
     	}
 
 
@@ -608,6 +631,7 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
     		var annots = data.annotations;
             if (!annots) {
                 res.status(500).end();
+                return;
             }
             // create a "fake" record containing the wikified concepts
             var record = { wikified: [] };
@@ -624,6 +648,7 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
                     count: 0,
                     data: []
                 });
+                return;
             } else {
                 // the wikified concepts exist so there is at
                 // least one job that is similar by concept
@@ -650,6 +675,7 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
                     count: relevantJobs.length,
                     data: relevantJobs
                 });
+                return;
             }
     	});
 	} catch (err) {
@@ -659,6 +685,7 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
         res.status(500).send({
             error: "Error on the Server Side..."
         });
+        return;
 	}
 });
 
@@ -670,6 +697,7 @@ app.post('/api/v1/concepts/text_job_similarity', function(req, res) {
 app.get('/api/v1/stats/count', function(req, res) {
     var initVal = init.getCount();
     res.status(200).send(initVal);
+    return;
 });
 
 app.get('/api/v1/stats/lists', function(req, res) {
@@ -680,6 +708,7 @@ app.get('/api/v1/stats/lists', function(req, res) {
         timeSeries: init.getTimeSeries()
     };
     res.status(200).send(initVal);
+    return;
 });
 
 app.get('/api/v1/stats/lists/skills', function(req, res) {
@@ -696,6 +725,7 @@ app.get('/api/v1/stats/lists/:length', function(req, res) {
         timeSeries: init.getTimeSeries(length, 10)
     };
     res.status(200).send(initVal);
+    return;
 });
 
 
