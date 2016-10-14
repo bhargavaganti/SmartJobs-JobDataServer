@@ -1,0 +1,29 @@
+[
+    {
+        "lang": "en",
+        "title": "Doulion: Counting Triangles in Massive Graphs with a Coin",
+        "lecture_id": 9182,
+        "video_id": 9340,
+        "text": "Counting the number of triangles in a graph is a beautiful algorithmic problem which has gained importance over the last years due to its significant role in complex network analysis. Metrics frequently computed such as the clustering coefficient and the transitivity ratio involve the execution of a triangle counting algorithm. Furthermore, several interesting graph mining applications rely on computing the number of triangles in the graph of interest. In this paper, we focus on the problem of counting triangles in a graph. We propose a practical method, out of which all triangle counting algorithms can potentially benefit. Using a straight-forward triangle counting algorithm as a black box, we performed 166 experiments on real-world networks and on synthetic datasets as well, where we show that our method works with high accuracy, typically more than 99\% and gives significant speedups, resulting in even $\approx$ 130 times faster performance.",
+        "categories": "computer science>data mining>graph mining",
+        "lecture_slug": "kdd09_tsourakakis_dctmgwc"
+    },
+    {
+        "lang": "en",
+        "title": "Zemlja ni nekaj izjemnega v vesolju",
+        "text": "Od renesanse vemo, da je Zemlja le eden od mnogih planetov, ki krožijo okoli naše zvezde, našega Sonca. V zadnjih sto letih smo ugotovili, da je v naši Galaksiji še stotine milijard zvezd, okoli katerih tudi zelo pogosto krožijo Zemlji podobni planeti. Tudi naša galaksija ni nič posebnega, v vesolju jih je kakih sto milijard. Znanost torej ugotavlja, da smo manj izjemni, kot bi kdo mislil. Ob tem je sedaj jasno, da je vesolje nastalo pred 13,8 milijardami let, torej je trikrat starejše od naše Zemlje. V predavanju smo govorili predvsem o nastanku zvezd in galaksij in to ponazorili z raziskavami strukture in nastanka naše Galaksije ter se pogovorili z opazovalci, ki so to noč zvezde naše Galaksije opazovali s Kopernikovim teleskopom v Asiagu v Italiji in z Angloavstralskim teleskopom v Siding Springu v Avstraliji. Vse civilizacije so izoblikovale zgodbe o nastanku sveta in našem mestu v njem. Sedaj odgovore prvič lahko iščemo z znanstveno metodo.",
+        "lecture_slug": "znanostnacesti_zwitter_vesolje",
+        "lecture_id": 24861,
+        "video_id": 24861,
+        "categories": "astronomy"
+    },
+    {
+        "lang": "en",
+        "title": "Machine learning",
+        "text": "",
+        "lecture_slug": "eswc2016_fortuna_machine_learning",
+        "lecture_id": 24730,
+        "video_id": 24722,
+        "categories": "computer science>semantic web"
+    }
+]
