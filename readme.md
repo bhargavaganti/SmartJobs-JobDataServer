@@ -1,11 +1,13 @@
-# Job Database API
+# SmartJobs Web API
 
-Job Database API enables the user to query for job information. Most of the jobs are related to data science.
+This repository contains the source code for SmartJobs Web API. This enables the user to get the crawled job information.
 
-## Server run
+## How To Run the Application
 
-- Run `npm install` to install all npm dependencies.
-- Run `npm start` to start the server.
+To run the application one must run `npm install` to get all of the dependencies needed to start the server. Then run `npm start` to start the server.
 
-**Warning:** Database must be created before the server is ran. This is created using `data/createBase.js`. The data is *not* given in the repository. Must be given manually.
+**Note:** Database must be created before the server is ran. This is created using `data/createBase.js`. The data is _not_ given in the repository. It must be given manually.
 
+## Testing Routes
+
+To test if the server is returning the correct information one can run tests using `mocha ./test/*.js` which runs the test files in the `test` folder. All tests should pass.
