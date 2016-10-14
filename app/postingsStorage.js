@@ -1,8 +1,7 @@
 var qm = require('qminer');
 
 /**
- * The postings storage class. Stores the postings that were Sent
- * through the POST /api/v1/jobs route.
+ * The postings storage class. Stores the postings that were sent through the POST /api/v1/jobs route.
  * @param {string} filepath - The path to the pending json file.
  */
 function postingsStorage(filepath) {
@@ -37,7 +36,7 @@ function postingsStorage(filepath) {
         } else if (postings instanceof Object) {
             storage.push(postings);
         } else {
-            throw "postingsStorage::storePostings: parameter must be an Array of Objects or an Object!";
+            return "postingsStorage::storePostings: parameter must be an Array of Objects or an Object!";
         }
         return self;
     };
@@ -57,7 +56,6 @@ function postingsStorage(filepath) {
     this.getPendingPath = function () {
         return pendingFile;
     };
-
 
     /**
      * Clears the storage.
