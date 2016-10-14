@@ -10,4 +10,6 @@ To run the application one must run `npm install` to get all of the dependencies
 
 ## Testing Routes
 
-To test if the server is returning the correct information one can run tests using `mocha ./test/*.js` which runs the test files in the `test` folder. All tests should pass.
+To test if the server is returning the correct information one can run tests using `mocha ./test/serverResponse.js` which runs the test files in the `test` folder. All tests should pass.
+
+**Note:** `mocha` s a feature-rich JavaScript test framework running on Node.js and in the browser, making asynchronous testing simple and fun. To install it run `npm install -g mocha`.
