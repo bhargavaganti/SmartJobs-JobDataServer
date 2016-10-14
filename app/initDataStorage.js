@@ -1,57 +1,33 @@
-// dependancy on format (requires EU countries)
-var format = require('./format');
-var winston = require('winston');
-var path = require('path');
-var fs = require('fs');
 
-// file rotation for winston
-winston.transports.DailyRotateFile = require('winston-daily-rotate-file');
+// EU Country names
+var EUCountries = ['Andorra', 'Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Czech Republic', 'Switzerland',
+    'Denmark', 'Germany', 'Spain', 'Estonia', 'Finland', 'France', 'United Kingdom', 'Greece', 'Hungary',
+    'Croatia', 'Ireland', 'Italy', 'Lithuania', 'Luxembourg', 'Latvia', 'Malta', 'Netherlands', 'Poland',
+    'Portugal', 'Romania', 'San Marino', 'Ukraine', 'Slovakia', 'Slovenia', 'Czechia'];
 
-// setup info streams
-var updateDirectory = path.join(__dirname, '..', 'log', 'initial', 'update');
-if(!fs.existsSync(updateDirectory)) {
-    fs.mkdirSync(updateDirectory);
-}
-var errorDirectory = path.join(__dirname, '..', 'log', 'initial', 'error');
-if(!fs.existsSync(errorDirectory)) {
-    fs.mkdirSync(errorDirectory);
-}
 
-var logger = new (winston.Logger)({
-    transports: [
-        new (winston.transports.DailyRotateFile)({
-            name: 'loading-file',
-            filename: updateDirectory + '/update.log',
-            level: 'info',
-            datePattern: '.yyyy-MM-dd',
-            prepend: false
-        }),
-        new (winston.transports.DailyRotateFile)({
-            name: 'error-file',
-            filename: errorDirectory + '/error.log',
-            level: 'error',
-            datePattern: '.yyyy-MM-dd',
-            prepend: false
-        })
-    ]
-});
-
-function InitData(_base) {
+/**
+ * Creates the storage for initial info.
+ * @param {qm.Base} _base - The QMiner database containing job postings info.
+ */
+function initDataStorage(_base) {
 
     var self = this;
+    // TODO: do we need concepts for the initial information??
 
     //////////////////////////////////////////////////
     // the initial statistic numbers
-    var numOfJobs = _base.store("JobPostings").length;
+    var numOfJobs      = _base.store("JobPostings").length;
+    var numOfSkills    = _base.store("Skills").length;
     var numOfLocations = _base.store("Locations").length;
-    var numOfSkills = _base.store("Skills").length;
-    var numOfConcepts = _base.store("Concepts").length;
+    var numOfCountries = _base.store("Countries").length;
+    // var numOfConcepts  = _base.store("Concepts").length;
 
-    var skills = computeSkills(_base, true);
-    var locations = computeLocations(_base, true);
-    var countries = computeCountries(_base, true);
+    var skills     = computeSkills(_base, true);
+    var locations  = computeLocations(_base, true);
+    var countries  = computeCountries(_base, true);
     var timeSeries = computeTimeSeries(_base, true);
-    var concepts = computeConcepts(_base, true);
+    // var concepts   = computeConcepts(_base, true);
 
     /**
      * Updates the data.
@@ -62,22 +38,18 @@ function InitData(_base) {
     this.update = function(base, sortF) {
         var sort = sortF === undefined ? false : sortF;
         try {
-
-            skills = computeSkills(base, sort);
-            locations = computeLocations(base, sort);
-            countries = computeCountries(base, sort);
-            timeSeries = computeTimeSeries(base, sort);
-            concepts = computeConcepts(base, sort);
-
             // update the initial statistics
-            numOfJobs = base.store("JobPostings").length;
+            numOfJobs      = base.store("JobPostings").length;
+            numOfSkills    = base.store("Skills").length;
             numOfLocations = base.store("Locations").length;
-            numOfSkills = base.store("Skills").length;
-            numOfConcepts = base.store("Concepts").length;
-            logger.info("Initialized data updated");
-            return self;
+            // numOfConcepts  = base.store("Concepts").length;
+
+            skills     = computeSkills(base, sort);
+            locations  = computeLocations(base, sort);
+            countries  = computeCountries(base, sort);
+            timeSeries = computeTimeSeries(base, sort);
+            // concepts   = computeConcepts(base, sort);
         } catch (err) {
-            logger.error("Error with updating data", { err_message: err.message });
         }
     };
 
@@ -89,6 +61,7 @@ function InitData(_base) {
             // basic statistics
             numOfJobs: numOfJobs,
             numOfLocations: numOfLocations,
+            numOfCountries: numOfCountries,
             numOfSkills: numOfSkills
         };
     };
@@ -153,19 +126,19 @@ function InitData(_base) {
         };
     };
 
-        /**
-         * Gets the most `_limit` requested concepts.
-         * @param  {Number} [_limit] - The number of concepts requested.
-         * @return {Object} Object containing the 'count' and 'data' fields.
-         */
-        this.getConcepts = function(_limit) {
-            var limit = _limit === undefined ? concepts.length : _limit;
-            var slicedConcepts = concepts.slice(0, limit);
-            return {
-                count: slicedConcepts.length,
-                data:  slicedConcepts
-            };
+    /**
+     * Gets the most `_limit` requested concepts.
+     * @param  {Number} [_limit] - The number of concepts requested.
+     * @return {Object} Object containing the 'count' and 'data' fields.
+     */
+    this.getConcepts = function(_limit) {
+        var limit = _limit === undefined ? concepts.length : _limit;
+        var slicedConcepts = concepts.slice(0, limit);
+        return {
+            count: slicedConcepts.length,
+            data:  slicedConcepts
         };
+    };
 
     /////////////////////////////////////////////////////
     // initialization functions
@@ -202,7 +175,6 @@ function InitData(_base) {
             };
             return skillPair;
         });
-        logger.info("Initialized skills");
         return topSkills;
     }
 
@@ -218,7 +190,7 @@ function InitData(_base) {
         var locations = base.store("Locations").allRecords;
         // remove country locations
         locations.filter(function(loc) {
-            return format.EUCountries.indexOf(loc.name) === -1;
+            return EUCountries.indexOf(loc.name) === -1;
         });
         // sort the remaining locations in descending order
         if (sort) {
@@ -245,7 +217,6 @@ function InitData(_base) {
                 });
             }
         }
-        logger.info("Initialized locations");
         return topLocations;
     }
 
@@ -281,7 +252,6 @@ function InitData(_base) {
             };
             return countryPair;
         });
-        logger.info("Initialized countries");
         return topCountries;
     }
 
@@ -294,7 +264,10 @@ function InitData(_base) {
     function computeTimeSeries(base, sortF) {
         var sort = sortF === undefined ? false : sortF;
 
-        var jobs = base.store("JobPostings").allRecords;
+        var date = new Date(Date.now());
+        var jobs = base.store("JobPostings").allRecords.filter(function (job) {
+            return job.date.getTime() > date.getTime() - 62*24*60*60*1000;  // two months
+        });
 
         var timeSeries = [];
         var dateIdx = {},
@@ -355,8 +328,6 @@ function InitData(_base) {
                 });
             });
         }
-
-        logger.info("Initialized timeseries");
         return timeSeries;
     }
 
@@ -392,7 +363,6 @@ function InitData(_base) {
             };
             return conceptPair;
         });
-        logger.info("Initialized concepts");
         return topConcepts;
     }
 
@@ -540,11 +510,9 @@ function InitData(_base) {
             });
         }
     }
-
-
-    // return initData object
+    // return initDataStorage object
     return this;
 }
 
 // contains the initialization values
-module.exports = InitData;
+module.exports = initDataStorage;
