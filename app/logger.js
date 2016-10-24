@@ -3,12 +3,7 @@ var path = require('path');
 var fs = require('fs');
 winston.transports.DailyRotateFile = require('winston-daily-rotate-file');
 
-module.exports = function (directoryPath) {
-    // setup info streams
-    var requestDirectory = path.join(__dirname, '../', directoryPath);
-    if (!fs.existsSync(requestDirectory)) {
-        fs.mkdirSync(requestDirectory);
-    }
+module.exports = function (requestDirectory) {
 
     var logger = new(winston.Logger)({
         transports: [

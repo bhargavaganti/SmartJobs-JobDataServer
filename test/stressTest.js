@@ -35,6 +35,7 @@ var intervalId = setInterval(function () {
     var options = obj[id];
     request.post(options, function (error, respnse, body) {
         // measure time
+        console.log(body);
         elapsedTime += clock(t0);
     });
     console.log("Number of secords:", count, "s");
