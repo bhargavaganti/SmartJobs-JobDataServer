@@ -1,0 +1,114 @@
+[
+    {
+        "name": "Jobs",
+        "fields": [
+            { "name": "uri", "type": "string", "store": "cache", "primary": true },
+            { "name": "url", "type": "string", "null": true },
+            { "name": "title", "type": "string", "null": true },
+            { "name": "date", "type": "datetime" },
+    		{ "name": "description", "type": "string", "null": true }
+    	],
+    	"joins": [
+    	    { "name": "inLocation", "type": "field", "store": "Locations", "inverse": "foundJobs" },
+            { "name": "inCountry", "type": "field", "store": "Countries", "inverse": "foundJobs" },
+            { "name": "forOrganization", "type": "field", "store": "Organizations", "inverse": "jobProposals" },
+            { "name": "requiredSkills", "type": "index", "store": "Skills", "inverse": "requiredForJobs" },
+            { "name": "foundConcepts", "type": "index", "store": "Concepts", "inverse": "foundForJobs" }
+    	],
+    	"keys": [
+    	    { "field": "title", "type": "text" },
+    	    { "field": "description", "type": "text" },
+            { "field": "date", "type": "value" }
+    	]
+    },
+    {
+        "name": "Skills",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "name", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "requiredForJobs", "type": "index", "store": "Jobs", "inverse": "requiredSkills" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "Concepts",
+        "fields": [
+            { "name": "uri", "type": "string" },
+            { "name": "name", "type": "string", "primary": true }
+        ],
+        "joins": [
+            { "name": "foundForJobs", "type": "index", "store": "Jobs", "inverse": "foundConcepts" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "Locations",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "coord", "type": "float_pair", "null": true },
+            { "name": "name", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "foundJobs", "type": "index", "store": "Jobs", "inverse": "inLocation" },
+            { "name": "inCountry", "type": "field", "store": "Countries", "inverse": "hasLocations" },
+            { "name": "foundOrganizations", "type": "index", "store": "Organizations", "inverse": "seatLocation" }
+
+        ],
+        "keys": [
+            { "field": "uri", "type": "text" },
+            { "field": "name", "type": "text" },
+            { "field": "coord", "type": "location" }
+        ]
+    },
+    {
+        "name": "Countries",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "coord", "type": "float_pair", "null": true },
+            { "name": "name", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "foundJobs", "type": "index", "store": "Jobs", "inverse": "inCountry" },
+            { "name": "hasLocations", "type": "index", "store": "Locations", "inverse": "inCountry" },
+            { "name": "foundOrganizations", "type": "index", "store": "Organizations", "inverse": "seatCountry" }
+
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "Organizations",
+        "fields": [
+            { "name": "uri", "type": "string", "store": "cache", "primary": true },
+            { "name": "title", "type": "string" },
+            { "name": "abbreviation", "type": "string", "null": true },
+            { "name": "logoUrl", "type": "string", "null": true },
+            { "name": "efficiency", "type": "number", "null": true }
+
+        ],
+        "joins": [
+            { "name": "jobProposals", "type": "index", "store": "Jobs", "inverse": "forOrganization" },
+            { "name": "seatLocation", "type": "field", "store": "Locations", "inverse": "foundOrganizations" },
+            { "name": "seatCountry", "type": "field", "store": "Countries", "inverse": "foundOrganizations" },
+            { "name": "sectors", "type": "index", "store": "Sector", "inverse": "hasOrganizations" }
+
+        ]
+    },
+    {
+        "name": "Sectors",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "name", "type": "string" }
+        ],
+        "joins": [
+            { "name": "hasOrganizations", "type": "index", "store": "Organizations", "inverse": "sectors" }
+        ]
+    }
+]

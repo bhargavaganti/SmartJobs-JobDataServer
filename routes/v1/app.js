@@ -124,12 +124,10 @@ function formatRequestSeveral(req, res, formatStyle) {
 function formatRequestSingle(req, res, formatStyle) {
     var id = req.params.id;
     try {
-        debugger;
         var record = database.getRecord(id);
-        debugger;
         if (record instanceof Object /* qm.Record */ ) {
             var job = formatStyle(record);
-            return responseHandlers.successHandler(req, res, jobs);
+            return responseHandlers.successHandler(req, res, job);
         } else {
             return responseHandlers.clientErrorHandler(req, res, "No Job with sprecified ID found: " + id);
         }
@@ -303,7 +301,7 @@ router.route('/v1/render_jobs')
                         var record = { wikified: [] };
                         for (var annN = 0; annN < annots.length; annN++) {
                             var concept = annots[annN].title;
-                            if (featureSpace.jobConcepts.indexOf(concept) > -1) {
+                            if (featureSpace.getJobConcepts().indexOf(concept) > -1) {
                                 record.wikified.push({ $name: concept });
                             }
                         }

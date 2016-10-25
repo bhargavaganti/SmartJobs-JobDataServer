@@ -38,6 +38,7 @@ app.use(morgan('short', {
 /// Prepare global variables
 
 cache = require('./app/cache')();
+cache.deleteAll();
 // setup info streams
 var requestDirectory = path.join(__dirname, 'log', 'request');
 if (!fs.existsSync(requestDirectory)) {

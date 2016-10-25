@@ -221,7 +221,15 @@ module.exports = exports = (function () {
 
         var recentRecords;       // the recent job postings
         var spConceptMat;        // the concept matrix
-        this.jobConcepts = [];   // array of job concepts
+        var jobConcepts = [];   // array of job concepts
+
+        /**
+         * Returns job concepts.
+         * @return {Array.<String>} An array of job concepts.
+         */
+        this.getJobConcepts = function () {
+            return jobConcepts;
+        }
 
         /**
          * Resets the feature space.
@@ -243,7 +251,7 @@ module.exports = exports = (function () {
             // get the sparse concept matrix
             spConceptMat = ftrSpace.extractSparseMatrix(recentRecords);
             // get the job concepts
-            this.jobConcepts = base.store("Concepts").allRecords.map(function (rec) {
+            jobConcepts = base.store("Concepts").allRecords.map(function (rec) {
                 return rec.name;
             });
         }
@@ -358,7 +366,7 @@ module.exports = exports = (function () {
             storage = fin.readJson();
             return self;
         };
-        
+
     }
 
     return exports;
