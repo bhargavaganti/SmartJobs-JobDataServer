@@ -126,7 +126,7 @@ app.route('/api/database')
 
 // use the versions
 app.use('/api', version1);
-app.use('/api', version2);
+app.use('/api/v2', version2);
 
 // response on database update
 app.get('/api/database', function (req, res, next) {

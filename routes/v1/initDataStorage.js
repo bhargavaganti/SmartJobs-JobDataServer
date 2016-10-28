@@ -17,7 +17,7 @@ function initDataStorage(_base) {
 
     //////////////////////////////////////////////////
     // the initial statistic numbers
-    var numOfJobs      = _base.store("JobPostings").length;
+    var numOfJobs      = _base.store("Jobs").length;
     var numOfSkills    = _base.store("Skills").length;
     var numOfLocations = _base.store("Locations").length;
     var numOfCountries = _base.store("Countries").length;
@@ -39,7 +39,7 @@ function initDataStorage(_base) {
         var sort = sortF === undefined ? false : sortF;
         try {
             // update the initial statistics
-            numOfJobs      = base.store("JobPostings").length;
+            numOfJobs      = base.store("Jobs").length;
             numOfSkills    = base.store("Skills").length;
             numOfLocations = base.store("Locations").length;
             // numOfConcepts  = base.store("Concepts").length;
@@ -265,7 +265,7 @@ function initDataStorage(_base) {
         var sort = sortF === undefined ? false : sortF;
 
         var date = new Date(Date.now());
-        var jobs = base.store("JobPostings").allRecords.filter(function (job) {
+        var jobs = base.store("Jobs").allRecords.filter(function (job) {
             return job.date.getTime() > date.getTime() - 62*24*60*60*1000;  // two months
         });
 
@@ -273,25 +273,29 @@ function initDataStorage(_base) {
         var dateIdx = {},
             idx = 0;
         jobs.each(function(job) {
-            if (dateIdx[job.dateFullStr]) {
+
+            var date = new Date(job.date);
+            var dateFullStr = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString() + '-' + (date.getDate()).toString();
+
+            if (dateIdx[dateFullStr]) {
                 // additional job has been found
-                timeSeries[dateIdx[job.dateFullStr]].value += 1;
+                timeSeries[dateIdx[dateFullStr]].value += 1;
                 // if the skill is not in the array, add to it
                 job.requiredSkills.each(function(skill) {
-                    var id = arrayObjectIndexOf(timeSeries[dateIdx[job.dateFullStr]].skillset, skill.name, "name");
+                    var id = arrayObjectIndexOf(timeSeries[dateIdx[dateFullStr]].skillset, skill.name, "name");
                     if (id === -1) {
-                        timeSeries[dateIdx[job.dateFullStr]].skillset.push({
+                        timeSeries[dateIdx[dateFullStr]].skillset.push({
                             name: skill.name,
                             value: 1
                         });
                     } else {
-                        timeSeries[dateIdx[job.dateFullStr]].skillset[id].value += 1;
+                        timeSeries[dateIdx[dateFullStr]].skillset[id].value += 1;
                     }
                 });
             } else {
                 // add the new day to the array
                 var day = {
-                    name: job.dateFullStr,
+                    name: dateFullStr,
                     value: 1,
                     skillset: job.requiredSkills.map(function(skill) {
                         return {
@@ -301,7 +305,7 @@ function initDataStorage(_base) {
                     })
                 };
                 timeSeries.push(day);
-                dateIdx[job.dateFullStr] = idx++;
+                dateIdx[dateFullStr] = idx++;
             }
         });
         if (sort) {
@@ -445,10 +449,14 @@ function initDataStorage(_base) {
 
         // inserts the record in the array
         function insertRecord(array, obj) {
-            var idx = arrayObjectIndexOf(array, obj.dateFullStr, "name");
+
+            var date = new Date(obj.date);
+            var dateFullStr = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString() + '-' + (date.getDate()).toString();
+
+            var idx = arrayObjectIndexOf(array, dateFullStr, "name");
             if (idx === -1) {
                 array.push({
-                    name: obj.dateFullStr,
+                    name: dateFullStr,
                     value: 1,
                     skillset: obj.requiredSkills.map(function (skill) {
                         return {

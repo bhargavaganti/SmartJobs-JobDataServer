@@ -124,7 +124,7 @@ function formatRequestSeveral(req, res, formatStyle) {
 function formatRequestSingle(req, res, formatStyle) {
     var id = req.params.id;
     try {
-        var record = database.getRecord(id);
+        var record = database.getRecord("Jobs", id);
         if (record instanceof Object /* qm.Record */ ) {
             var job = formatStyle(record);
             return responseHandlers.successHandler(req, res, job);
@@ -317,13 +317,13 @@ router.route('/v1/render_jobs')
                         } else {
                             // the wikified concepts exist so there is at
                             // least one job that is similar by concept
-                            var lectureRec = database.createNewRecord(record);
+                            var lectureRec = database.createNewRecord("Jobs", record);
                             var relevantId = featureSpace.getRelevantJobs(lectureRec);
                             if (relevantId.length !== 0) {
                                 options.job_concepts = format.toConceptHtmlObject(key, relevantId.length);
                                 // get the formated job postings
                                 var intV = new qm.la.IntVector(relevantId);
-                                var answer = database.createNewRecordSet(intV);
+                                var answer = database.createNewRecordSet("Jobs", intV);
                                 var jobPostings = format.toAllInfoFormat(answer);
                                 // render and cache the result
                                 html = htmlRender(options);

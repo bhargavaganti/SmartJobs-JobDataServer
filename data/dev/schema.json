@@ -2,22 +2,26 @@
     {
         "name": "Jobs",
         "fields": [
-            { "name": "uri", "type": "string", "store": "cache", "primary": true },
+            { "name": "uri", "type": "string", "primary": true },
             { "name": "url", "type": "string", "null": true },
             { "name": "title", "type": "string", "null": true },
             { "name": "date", "type": "datetime" },
-    		{ "name": "description", "type": "string", "null": true }
+    		{ "name": "description", "type": "string", "null": true },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
     	],
     	"joins": [
     	    { "name": "inLocation", "type": "field", "store": "Locations", "inverse": "foundJobs" },
             { "name": "inCountry", "type": "field", "store": "Countries", "inverse": "foundJobs" },
             { "name": "forOrganization", "type": "field", "store": "Organizations", "inverse": "jobProposals" },
             { "name": "requiredSkills", "type": "index", "store": "Skills", "inverse": "requiredForJobs" },
-            { "name": "foundConcepts", "type": "index", "store": "Concepts", "inverse": "foundForJobs" }
+            { "name": "foundConcepts", "type": "index", "store": "Concepts", "inverse": "foundForJobs" },
+            { "name": "foundDmozSectors", "type": "index", "store": "DmozSectors", "inverse": "containsJobs" },
+            { "name": "foundYahooSectors", "type": "index", "store": "YahooSectors", "inverse": "containsJobs" },
+            { "name": "foundIn", "type": "field", "store": "Sources", "inverse": "found" }
     	],
     	"keys": [
     	    { "field": "title", "type": "text" },
-    	    { "field": "description", "type": "text" },
             { "field": "date", "type": "value" }
     	]
     },
@@ -25,7 +29,9 @@
         "name": "Skills",
         "fields": [
             { "name": "uri", "type": "string", "primary": true },
-            { "name": "name", "type": "string", "null": true }
+            { "name": "name", "type": "string", "null": true },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
         ],
         "joins": [
             { "name": "requiredForJobs", "type": "index", "store": "Jobs", "inverse": "requiredSkills" }
@@ -37,8 +43,10 @@
     {
         "name": "Concepts",
         "fields": [
-            { "name": "uri", "type": "string" },
-            { "name": "name", "type": "string", "primary": true }
+            { "name": "uri", "type": "string", "null": true },
+            { "name": "name", "type": "string", "primary": true },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
         ],
         "joins": [
             { "name": "foundForJobs", "type": "index", "store": "Jobs", "inverse": "foundConcepts" }
@@ -52,7 +60,9 @@
         "fields": [
             { "name": "uri", "type": "string", "primary": true },
             { "name": "coord", "type": "float_pair", "null": true },
-            { "name": "name", "type": "string", "null": true }
+            { "name": "name", "type": "string", "null": true },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
         ],
         "joins": [
             { "name": "foundJobs", "type": "index", "store": "Jobs", "inverse": "inLocation" },
@@ -61,7 +71,6 @@
 
         ],
         "keys": [
-            { "field": "uri", "type": "text" },
             { "field": "name", "type": "text" },
             { "field": "coord", "type": "location" }
         ]
@@ -71,7 +80,9 @@
         "fields": [
             { "name": "uri", "type": "string", "primary": true },
             { "name": "coord", "type": "float_pair", "null": true },
-            { "name": "name", "type": "string", "null": true }
+            { "name": "name", "type": "string", "null": true },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
         ],
         "joins": [
             { "name": "foundJobs", "type": "index", "store": "Jobs", "inverse": "inCountry" },
@@ -80,35 +91,82 @@
 
         ],
         "keys": [
-            { "field": "name", "type": "text" }
+            { "field": "name", "type": "text" },
+            { "field": "coord", "type": "location" }
         ]
     },
     {
         "name": "Organizations",
         "fields": [
-            { "name": "uri", "type": "string", "store": "cache", "primary": true },
-            { "name": "title", "type": "string" },
+            { "name": "title", "type": "string", "primary": true },
             { "name": "abbreviation", "type": "string", "null": true },
             { "name": "logoUrl", "type": "string", "null": true },
-            { "name": "efficiency", "type": "number", "null": true }
-
+            { "name": "CEO", "type": "string", "null": true },
+            { "name": "previousStockPrice", "type": "float", "null": true },
+            { "name": "currentStockPrice", "type": "float", "null": true },
+            { "name": "previousStockVolume", "type": "int", "null": true },
+            { "name": "currentStockVolume", "type": "int", "null": true },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
         ],
         "joins": [
             { "name": "jobProposals", "type": "index", "store": "Jobs", "inverse": "forOrganization" },
             { "name": "seatLocation", "type": "field", "store": "Locations", "inverse": "foundOrganizations" },
             { "name": "seatCountry", "type": "field", "store": "Countries", "inverse": "foundOrganizations" },
-            { "name": "sectors", "type": "index", "store": "Sector", "inverse": "hasOrganizations" }
-
+            { "name": "yahooSectors", "type": "index", "store": "YahooSectors", "inverse": "hasOrganizations" },
+            { "name": "dmozSectors", "type": "index", "store": "DmozSectors", "inverse": "hasOrganizations" }
+        ],
+        "keys": [
+            { "field": "title", "type": "text" },
+            { "field": "CEO", "type": "text" },
+            { "field": "abbreviation", "type": "text" }
         ]
     },
     {
-        "name": "Sectors",
+        "name": "DmozSectors",
         "fields": [
             { "name": "uri", "type": "string", "primary": true },
-            { "name": "name", "type": "string" }
+            { "name": "name", "type": "string" },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
         ],
         "joins": [
-            { "name": "hasOrganizations", "type": "index", "store": "Organizations", "inverse": "sectors" }
+            { "name": "hasOrganizations", "type": "index", "store": "Organizations", "inverse": "dmozSectors" },
+            { "name": "containsJobs", "type": "index", "store": "Jobs", "inverse": "foundDmozSectors" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "YahooSectors",
+        "fields": [
+            { "name": "uri", "type": "string", "primary": true },
+            { "name": "name", "type": "string" },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "hasOrganizations", "type": "index", "store": "Organizations", "inverse": "yahooSectors" },
+            { "name": "containsJobs", "type": "index", "store": "Jobs", "inverse": "foundYahooSectors" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
+        ]
+    },
+    {
+        "name": "Sources",
+        "fields": [
+            { "name": "uri", "type": "string", "null": true },
+            { "name": "name", "type": "string",  "primary": true  },
+            { "name": "field1", "type": "string", "null": true },
+            { "name": "field2", "type": "string", "null": true }
+        ],
+        "joins": [
+            { "name": "found", "type": "index", "store": "Jobs", "inverse": "foundIn" }
+        ],
+        "keys": [
+            { "field": "name", "type": "text" }
         ]
     }
 ]

@@ -54,10 +54,13 @@ function allInfoFormat(record) {
     var title = record.title.replace(/<\/?strong>/g, '');
     title = title.replace(/&lt;\/?strong&gt;/g, '');
 
+    var date = new Date(record.date);
+    var dateFullStr = date.getFullYear().toString() + '-' + (date.getMonth() + 1).toString() + '-' + (date.getDate()).toString();
+
     return {
         id:  record.$id,
         timestamp: Date.parse(record.date),
-        date: record.dateFullStr,
+        date: dateFullStr,
         title: title,
         organization: record.organization,
         description: record.description,
@@ -115,6 +118,7 @@ function locationAndSkillFormat(record) {
     if (!loc.coord || loc.name === 'Northern Europe') {
         return;
     }
+
     return {
         id:  record.$id,
         timestamp: Date.parse(record.date),

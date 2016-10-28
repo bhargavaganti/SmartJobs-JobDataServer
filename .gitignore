@@ -7,6 +7,7 @@ node_modules/
 # database path and files
 CIKM/
 data/db/
+data/database/
 data/demand/
 data/pending/
 

@@ -15,7 +15,7 @@ module.exports = exports = (function () {
          */
         var base = new qm.Base({
             mode: 'openReadOnly',
-            dbPath: './data/db/'
+            dbPath: './data/database/'
         });
 
         /////////////////////////////////////////
@@ -34,8 +34,8 @@ module.exports = exports = (function () {
          * @param  {number} id - The id of the record.
          * @return {qm.Record} The record.
          */
-        this.getRecord = function (id) {
-            return base.store("JobPostings")[id];
+        this.getRecord = function (storeName, id) {
+            return base.store(storeName)[id];
         }
 
         /**
@@ -43,8 +43,8 @@ module.exports = exports = (function () {
          * @param  {Object} record - The record structure.
          * @return {qm.Record} The record.
          */
-        this.createNewRecord = function (record) {
-            return base.store("JobPostings").newRecord(record);
+        this.createNewRecord = function (storeName, record) {
+            return base.store(storeName).newRecord(record);
         }
 
         /**
@@ -52,8 +52,8 @@ module.exports = exports = (function () {
          * @param  {qm.la.IntVector} intV - The integer vector containing record ids.
          * @return {qm.RecSet} The record set.
          */
-        this.createNewRecordSet = function (intV) {
-            return base.store("JobPostings").newRecordSet(intV);
+        this.createNewRecordSet = function (storeName, intV) {
+            return base.store(storeName).newRecordSet(intV);
         }
 
         /**
@@ -70,23 +70,23 @@ module.exports = exports = (function () {
 
             base.close(); base = new qm.Base({
                 mode: 'open',
-                dbPath: './data/db/'
+                dbPath: './data/database/'
             });
             // update the database with postings
             if (postings instanceof Array) {
                 for (var RecN = 0; RecN < postings.length; RecN++) {
                     var record = postings[RecN];
-                    base.store("JobPostings").push(record);
+                    base.store("Jobs").push(record);
                 }
             } else if (postings instanceof Object) {
-                base.store("JobPostings").push(postings);
+                base.store("Jobs").push(postings);
             } else {
                 throw "Records must be an Array of Object or an Object!";
             }
             // open database in read only mode
             base.close(); base = new qm.Base({
                 mode: 'openReadOnly',
-                dbPath: './data/db/'
+                dbPath: './data/database/'
             });
         }
 
@@ -215,7 +215,7 @@ module.exports = exports = (function () {
 
         if (_base) {
             ftrSpace = new qm.FeatureSpace(_base, [
-                { type: 'multinomial', source: { store: "JobPostings", join: "wikified" }, field: "name" }
+                { type: 'multinomial', source: { store: "Jobs", join: "foundConcepts" }, field: "name" }
             ]);
         }
 
@@ -239,12 +239,12 @@ module.exports = exports = (function () {
             // creates a new instance of feature space, because base might not be allways the same
             // meaning not the same instance (C++ pointers might not point to the same object)
             ftrSpace = new qm.FeatureSpace(base, [
-                { type: 'multinomial', source: { store: "JobPostings", join: "wikified" }, field: "name" }
+                { type: 'multinomial', source: { store: "Jobs", join: "foundConcepts" }, field: "name" }
             ]);
             // update the feature space with the job posts from the last 14 days
             // and has the wikified concepts stored
             var date = new Date(Date.now());
-            recentRecords = base.store("JobPostings").allRecords.filter(function (job) {
+            recentRecords = base.store("Jobs").allRecords.filter(function (job) {
                 return job.date.getTime() > date.getTime() - 14*24*60*60*1000;  // two weeks
             });
             ftrSpace.updateRecords(recentRecords);

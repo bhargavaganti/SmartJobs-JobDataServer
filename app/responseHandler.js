@@ -12,6 +12,16 @@ exports.successHandler = function (req, res, data) {
 }
 
 /**
+ * Response when there is data to return.
+ * @param  {Object} req     - The request.
+ * @param  {Object} res     - The response.
+ * @param  {Object} data - THe data returned to the client.
+ */
+exports.successJSONHandler = function (req, res, data) {
+    res.status(200).json(data);
+}
+
+/**
  * Response when there is a client error.
  * @param  {Object} req     - The request.
  * @param  {Object} res     - The response.
@@ -29,4 +39,8 @@ exports.clientErrorHandler = function (req, res, message) {
  */
 exports.serverErrorHandler = function (req, res, message) {
     res.status(500).send(message);
+}
+
+exports.successJSONHandler = function (req, res, data) {
+    res.status(200).json(data);
 }
