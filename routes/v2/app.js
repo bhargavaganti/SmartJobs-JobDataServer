@@ -3,6 +3,7 @@ var responseHandlers = require('../../app/responseHandler');
 
 var middleware = require('./middleware');
 
+var querystring = require('querystring');
 var router = require('express').Router();
 
 
@@ -14,10 +15,42 @@ router.get('/', function (req, res) {
 /// Jobs routes
 
 router.get('/jobs', function (req, res) {
-    if (req.query) {
-        return responseHandlers.successHandler(req, res, "with query");
+    var query = req.query;
+    if (Object.keys(query).length !== 0) {
+        // query for jobs
+        console.log(query);
+        var recordSet = database.query(query);
+        var response;
+        if (recordSet.length !== 0) {
+            var data = recordSet.map(function (rec) {
+                return format.formatJob(rec, true);
+            });
+
+            var included = [];
+            data.forEach(function (obj) {
+                included = included.concat(middleware.included(obj));
+            });
+
+            response = {
+                links: {
+                    self: "http://localhost:2510/api/v2/jobs?" + querystring.stringify(query)
+                },
+                data: data,
+                included: included
+            };
+
+
+        } else {
+            response = {
+                links: {
+                    self: "http://localhost:2510/api/v2/jobs?" + querystring.stringify(query)
+                },
+                data: []
+            };
+        }
+        return responseHandlers.successHandler(req, res, response);
     } else {
-        return responseHandlers.successHandler(req, res, "no query");
+        return responseHandlers.successHandler(req, res, { errors: ["no query given"] });
     }
 });
 
@@ -27,14 +60,15 @@ router.get('/jobs/:id([0-9]+)', middleware.lookup.job, function (req, res) {
         links: {
             self: "http://localhost:2510/api/v2/jobs/" + req.params.id
         },
-        data: job
+        data: job,
+        included: middleware.included(job)
     };
     return responseHandlers.successJSONHandler(req, res, response);
 });
 
 router.get('/jobs/:id([0-9]+)/location', middleware.lookup.job, function (req, res) {
     var job = req.job;
-    var location = middleware.lookup.relationship.location(job);
+    var location = middleware.lookup.relationship.location(job, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/jobs/" + req.params.id + "/location"
@@ -46,7 +80,7 @@ router.get('/jobs/:id([0-9]+)/location', middleware.lookup.job, function (req, r
 
 router.get('/jobs/:id([0-9]+)/country', middleware.lookup.job, function (req, res) {
     var job = req.job;
-    var country = middleware.lookup.relationship.country(job);
+    var country = middleware.lookup.relationship.country(job, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/jobs/" + req.params.id + "/country"
@@ -58,7 +92,7 @@ router.get('/jobs/:id([0-9]+)/country', middleware.lookup.job, function (req, re
 
 router.get('/jobs/:id([0-9]+)/skills', middleware.lookup.job, function (req, res) {
     var job = req.job;
-    var skills = middleware.lookup.relationship.skills(job);
+    var skills = middleware.lookup.relationship.skills(job, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/jobs/" + req.params.id + "/skills"
@@ -70,7 +104,7 @@ router.get('/jobs/:id([0-9]+)/skills', middleware.lookup.job, function (req, res
 
 router.get('/jobs/:id([0-9]+)/organization', middleware.lookup.job, function (req, res) {
     var job = req.job;
-    var organization = middleware.lookup.relationship.organization(job);
+    var organization = middleware.lookup.relationship.organization(job, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/jobs/" + req.params.id + "/organization"
@@ -84,10 +118,11 @@ router.get('/jobs/:id([0-9]+)/organization', middleware.lookup.job, function (re
 /// Locations routes
 
 router.get('/locations', function (req, res) {
-    if (req.query) {
+    var query = req.query;
+    if (Object.keys(query).length !== 0) {
         return responseHandlers.successHandler(req, res, "with query");
     } else {
-        return responseHandlers.successHandler(req, res, "no query");
+        return responseHandlers.successHandler(req, res, { errors: ["no query given"] });
     }
 });
 
@@ -97,14 +132,16 @@ router.get('/locations/:id([0-9]+)', middleware.lookup.location, function (req, 
         links: {
             self: "http://localhost:2510/api/v2/locations/" + req.params.id
         },
-        data: location
+        data: location,
+        included: middleware.included(location)
+
     };
     return responseHandlers.successJSONHandler(req, res, response);
 });
 
 router.get('/locations/:id([0-9]+)/jobs', middleware.lookup.location, function (req, res) {
     var location = req.location;
-    var jobs = middleware.lookup.relationship.jobs(location);
+    var jobs = middleware.lookup.relationship.jobs(location, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/locations/" + req.params.id + "/jobs"
@@ -116,7 +153,7 @@ router.get('/locations/:id([0-9]+)/jobs', middleware.lookup.location, function (
 
 router.get('/locations/:id([0-9]+)/country', middleware.lookup.location, function (req, res) {
     var location = req.location;
-    var country = middleware.lookup.relationship.country(location);
+    var country = middleware.lookup.relationship.country(location, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/locations/" + req.params.id + "/country"
@@ -142,10 +179,11 @@ router.get('/locations/:id([0-9]+)/country', middleware.lookup.location, functio
 /// Countries routes
 
 router.get('/countries', function (req, res) {
-    if (req.query) {
+    var query = req.query;
+    if (Object.keys(query).length !== 0) {
         return responseHandlers.successHandler(req, res, "with query");
     } else {
-        return responseHandlers.successHandler(req, res, "no query");
+        return responseHandlers.successHandler(req, res, { errors: ["no query given"] });
     }
 });
 
@@ -155,14 +193,16 @@ router.get('/countries/:id([0-9]+)', middleware.lookup.country, function (req, r
         links: {
             self: "http://localhost:2510/api/v2/countries/" + req.params.id
         },
-        data: country
+        data: country,
+        included: middleware.included(country)
+
     };
     return responseHandlers.successJSONHandler(req, res, response);
 });
 
 router.get('/countries/:id([0-9]+)/jobs', middleware.lookup.country, function (req, res) {
     var country = req.country;
-    var jobs = middleware.lookup.relationship.jobs(country);
+    var jobs = middleware.lookup.relationship.jobs(country, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/countries/" + req.params.id + "/jobs"
@@ -174,7 +214,7 @@ router.get('/countries/:id([0-9]+)/jobs', middleware.lookup.country, function (r
 
 router.get('/countries/:id([0-9]+)/locations', middleware.lookup.country, function (req, res) {
     var country = req.country;
-    var locations = middleware.lookup.relationship.locations(country);
+    var locations = middleware.lookup.relationship.locations(country, true);
     var response = {
         links: {
             self: "http://localhost:2510/api/v2/countries/" + req.params.id + "/locations"
@@ -200,26 +240,44 @@ router.get('/countries/:id([0-9]+)/locations', middleware.lookup.country, functi
 /// Organizations routes
 
 router.get('/organizations', function (req, res) {
-    if (req.query) {
+    var query = req.query;
+    if (Object.keys(query).length !== 0) {
         return responseHandlers.successHandler(req, res, "with query");
     } else {
-        return responseHandlers.successHandler(req, res, "no query");
+        return responseHandlers.successHandler(req, res, { errors: ["no query given"] });
     }
 });
 
-router.get('/organizations/:id([0-9]+)', function (req, res) {
-    var id = req.params.id;
+router.get('/organizations/:id([0-9]+)', middleware.lookup.organization, function (req, res) {
+    var organization = req.organization;
+    var response = {
+        links: {
+            self: "http://localhost:2510/api/v2/organizations/" + req.params.id
+        },
+        data: organization,
+        included: middleware.included(organization)
+
+    };
+    return responseHandlers.successJSONHandler(req, res, response);
 });
 
-router.get('/organizations/:id([0-9]+)/jobs', function (req, res) {
-    var id = req.params.id;
+router.get('/organizations/:id([0-9]+)/jobs', middleware.lookup.organization, function (req, res) {
+        var organization = req.organization;
+        var jobs = middleware.lookup.relationship.jobs(organization, true);
+        var response = {
+            links: {
+                self: "http://localhost:2510/api/v2/organizations/" + req.params.id + "/jobs"
+            },
+            data: jobs
+        };
+        return responseHandlers.successJSONHandler(req, res, response);
 });
 
-// router.get('/organizations/:id([0-9]+)/location', function (req, res) {
+// router.get('/organizations/:id([0-9]+)/location', middleware.lookup.organization, function (req, res) {
 //     var id = req.params.id;
 // });
 //
-// router.get('/organizations/:id([0-9]+)/country', function (req, res) {
+// router.get('/organizations/:id([0-9]+)/country', middleware.lookup.organization, function (req, res) {
 //     var organization = req.organization;
 //     var country = middleware.lookup.relationship.country(organization);
 //     var response = {
@@ -235,26 +293,48 @@ router.get('/organizations/:id([0-9]+)/jobs', function (req, res) {
 /// Skills routes
 
 router.get('/skills', function (req, res) {
-    if (req.query) {
+    var query = req.query;
+    if (Object.keys(query).length !== 0) {
         return responseHandlers.successHandler(req, res, "with query");
     } else {
-        return responseHandlers.successHandler(req, res, "no query");
+        return responseHandlers.successHandler(req, res, { errors: ["no query given"] });
     }
 });
 
-router.get('/skills/:id([0-9]+)', function (req, res) {
-    var id = req.params.id;
+router.get('/skills/:id([0-9]+)', middleware.lookup.skill, function (req, res) {
+    var skill = req.skill;
+    var response = {
+        links: {
+            self: "http://localhost:2510/api/v2/skills/" + req.params.id
+        },
+        data: skill,
+        included: middleware.included(skill)
+    };
+    return responseHandlers.successJSONHandler(req, res, response);
 });
 
-router.get('/skills/:id([0-9]+)/jobs', function (req, res) {
-    var id = req.params.id;
+router.get('/skills/:id([0-9]+)/jobs', middleware.lookup.skill, function (req, res) {
+    var skill = req.skill;
+    var jobs = middleware.lookup.relationship.jobs(skill, true);
+    var response = {
+        links: {
+            self: "http://localhost:2510/api/v2/skills/" + req.params.id + "/jobs"
+        },
+        data: jobs
+    };
+    return responseHandlers.successJSONHandler(req, res, response);
 });
 
 /////////////////////////////
 /// Sectors routes
 
 router.get('/sectors', function (req, res) {
-
+    var query = req.query;
+    if (Object.keys(query).length !== 0) {
+        return responseHandlers.successHandler(req, res, "with query");
+    } else {
+        return responseHandlers.successHandler(req, res, { errors: ["no query given"] });
+    }
 });
 
 router.get('/sectors/:id([0-9]+)', function (req, res) {
