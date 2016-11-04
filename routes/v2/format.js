@@ -10,7 +10,11 @@ var exports = module.exports = {};
  * @param  {qm.Record} job - The QMiner job instance.
  * @return {Object} The JSON API representation of the job.
  */
-exports.formatJob = function (job) {
+exports.formatJob = function (job, relationFlag) {
+
+    var flag = relationFlag ? relationFlag : false;
+
+    // prepare data information
     var jsonapi = {
         id: job.$id,
         type: "job",
@@ -18,9 +22,17 @@ exports.formatJob = function (job) {
             title: job.title,
             date: job.date,
             description: job.description
-        },
-        relationships: {
-            location: {
+        }
+    };
+
+    // if we want to have relationships
+    if (flag) {
+        if (job.inLocation || job.inCountry || job.forOrganization) {
+            jsonapi.relationships = { };
+        }
+
+        if (job.inLocation) {
+            jsonapi.relationships.location = {
                 links: {
                     self: "http://localhost:2510/api/v2/jobs/" + job.$id + "/location"
                 },
@@ -28,8 +40,11 @@ exports.formatJob = function (job) {
                     type: "location",
                     id: job.inLocation.$id
                 }
-            },
-            country: {
+            };
+        }
+
+        if (job.inCountry) {
+            jsonapi.relationships.country = {
                 links: {
                     self: "http://localhost:2510/api/v2/jobs/" + job.$id + "/country"
                 },
@@ -37,8 +52,11 @@ exports.formatJob = function (job) {
                     type: "country",
                     id: job.inCountry.$id
                 }
-            },
-            skills: {
+            };
+        }
+
+        if (job.requiredSkills) {
+            jsonapi.relationships.skills = {
                 links: {
                     self: "http://localhost:2510/api/v2/jobs/" + job.$id + "/skills"
                 },
@@ -48,8 +66,11 @@ exports.formatJob = function (job) {
                         id: skill.$id
                     };
                 })
-            },
-            organization: {
+            };
+        }
+
+        if (job.forOrganization) {
+            jsonapi.relationships.organization = {
                 links: {
                     self:  "http://localhost:2510/api/v2/jobs/" + job.$id + "/organization"
                 },
@@ -57,23 +78,32 @@ exports.formatJob = function (job) {
                     type: "organization",
                     id: job.forOrganization.$id
                 }
-            }
+            };
         }
-    };
-
+    }
     return jsonapi;
 }
 
-exports.formatLocation = function (location) {
+exports.formatLocation = function (location, relationFlag) {
+
+    var flag = relationFlag ? relationFlag : false;
+
     var jsonapi = {
         id: location.$id,
         type: "location",
         attributes: {
             name: location.name,
             coord: location.coord
-        },
-        relationships: {
-            jobs: {
+        }
+    };
+
+    if (flag) {
+        if (location.foundJobs || location.inCountry || location.foundOrganizations) {
+            jsonapi.relationships = { };
+        }
+
+        if (location.foundJobs) {
+            jsonapi.relationships.jobs = {
                 links: {
                     self: "http://localhost:2510/api/v2/locations/" + location.$id + "/jobs"
                 },
@@ -83,8 +113,11 @@ exports.formatLocation = function (location) {
                         id: job.$id
                     };
                 })
-            },
-            country: {
+            };
+        }
+
+        if (location.inCountry) {
+            jsonapi.relationships.country = {
                 links: {
                     self: "http://localhost:2510/api/v2/locations/" + location.$id + "/country"
                 },
@@ -92,37 +125,50 @@ exports.formatLocation = function (location) {
                     type: "country",
                     id: location.inCountry.$id
                 }
-            },
-            // organizations: {
-            //     links: {
-            //         self:  "http://localhost:2510/api/v2/jobs/" + location.$id + "/organizations"
-            //     },
-            //     data: {
-            //         type: "organization",
-            //         id: location.foundOrganizations.map(function (org) {
-            //             return {
-            //                 type: "organization",
-            //                 id: org.$id
-            //             };
-            //         })
-            //     }
-            // }
+            };
         }
-    };
+
+        if (location.foundOrganizations) {
+            jsonapi.relationships.organizations = {
+                links: {
+                    self:  "http://localhost:2510/api/v2/locations/" + location.$id + "/organizations"
+                },
+                data: {
+                    type: "organization",
+                    id: location.foundOrganizations.map(function (org) {
+                        return {
+                            type: "organization",
+                            id: org.$id
+                        };
+                    })
+                }
+            };
+        }
+    }
 
     return jsonapi;
 }
 
-exports.formatCountry = function (country) {
+exports.formatCountry = function (country, relationFlag) {
+
+    var flag = relationFlag ? relationFlag : false;
+
     var jsonapi = {
         id: country.$id,
         type: "country",
         attributes: {
             name: country.name,
             coord: country.coord
-        },
-        relationships: {
-            jobs: {
+        }
+    };
+
+    if (flag) {
+        if (country.foundJobs || country.hasLocations || country.foundOrganizations) {
+            jsonapi.relationships = { };
+        }
+
+        if (country.foundJobs) {
+            jsonapi.relationships.jobs = {
                 links: {
                     self: "http://localhost:2510/api/v2/countries/" + country.$id + "/jobs"
                 },
@@ -132,63 +178,85 @@ exports.formatCountry = function (country) {
                         id: job.$id
                     };
                 })
-            },
-            locations: {
+            };
+        }
+
+        if (country.hasLocations) {
+            jsonapi.relationships.locations = {
                 links: {
                     self: "http://localhost:2510/api/v2/countries/" + country.$id + "/locations"
                 },
-                data: country.hasLocations.map(function (location) {
+                data: country.hasLocations.map(function (loc) {
                     return {
                         type: "location",
-                        id: location.$id
+                        id: loc.$id
                     }
                 })
-            },
-            // organizations: {
-            //     links: {
-            //         self:  "http://localhost:2510/api/v2/countries/" + country.$id + "/organizations"
-            //     },
-            //     data: {
-            //         type: "organization",
-            //         id: country.foundOrganizations.map(function (org) {
-            //             return {
-            //                 type: "organization",
-            //                 id: org.$id
-            //             };
-            //         })
-            //     }
-            // }
+            };
         }
-    };
+
+        if (country.foundOrganizations) {
+            jsonapi.relationships.organizations = {
+                links: {
+                    self:  "http://localhost:2510/api/v2/countries/" + country.$id + "/organizations"
+                },
+                data: {
+                    type: "organization",
+                    id: country.foundOrganizations.map(function (org) {
+                        return {
+                            type: "organization",
+                            id: org.$id
+                        };
+                    })
+                }
+            };
+        }
+    }
 
     return jsonapi;
 }
 
-exports.formatSkill = function (skill) {
+exports.formatSkill = function (skill, relationFlag) {
+
+    var flag = relationFlag ? relationFlag : false;
+
     var jsonapi = {
         id: skill.$id,
         type: "skill",
         attributes: {
             name: skill.name
-        },
-        relationships: {
-            jobs: {
-                links: {
-                    self: "http://localhost:2510/api/v2/skills/" + skill.$id + "/jobs"
-                },
-                data: skill.requiredForJobs.map(function (job) {
-                    return {
-                        type: "job",
-                        id: job.$id
-                    };
-                })
-            }
         }
     };
+
+    if (flag) {
+        if (skill.requiredForJobs) {
+            jsonapi.relationships = { };
+        }
+
+        if (skill.requiredForJobs) {
+            jsonapi.relationships.jobs = {
+                links: {
+                    links: {
+                        self: "http://localhost:2510/api/v2/skills/" + skill.$id + "/jobs"
+                    },
+                    data: skill.requiredForJobs.map(function (job) {
+                        return {
+                            type: "job",
+                            id: job.$id
+                        };
+                    })
+                }
+            };
+        }
+    }
+
     return jsonapi;
 }
 
-exports.formatOrganization = function (organization) {
+exports.formatOrganization = function (organization, relationFlag) {
+
+    var flag = relationFlag ? relationFlag : false;
+
     var jsonapi = {
         id: organization.$id,
         type: "organization",
@@ -197,9 +265,16 @@ exports.formatOrganization = function (organization) {
             abbreviation: organization.abbreviation,
             logoUrl: organization.logoUrl,
             CEO: organization.CEO
-        },
-        relationships: {
-            jobs: {
+        }
+    };
+
+    if (flag) {
+        if (organization.jobProposals || organization.seatLocation || organization.seatCountry) {
+            jsonapi.relationships = { };
+        }
+
+        if (organization.jobProposals) {
+            jsonapi.relationships.jobs = {
                 links: {
                     self: "http://localhost:2510/api/v2/organizations/" + organization.$id + "/jobs"
                 },
@@ -209,27 +284,33 @@ exports.formatOrganization = function (organization) {
                         id: job.$id
                     };
                 })
-            }
-            // location: {
-            //     links: {
-            //         self: "http://localhost:2510/api/v2/organizations/" + organization.$id + "/location"
-            //     },
-            //     data: {
-            //         type: "location",
-            //         id: organization.seatLocation.$id
-            //     }
-            // },
-            // country: {
-            //     links: {
-            //         self: "http://localhost:2510/api/v2/organizations/" + organization.$id + "/country"
-            //     },
-            //     data: {
-            //         type: "country",
-            //         id: organization.seatCountry.$id
-            //     }
-            // }
+            };
         }
-    };
+
+        if (organization.seatLocation) {
+            jsonapi.relationships.location = {
+                links: {
+                    self: "http://localhost:2510/api/v2/organizations/" + organization.$id + "/location"
+                },
+                data: {
+                    type: "location",
+                    id: organization.seatLocation.$id
+                }
+            };
+        }
+
+        if (organization.seatCountry) {
+            jsonapi.relationships.country = {
+                links: {
+                    self: "http://localhost:2510/api/v2/organizations/" + organization.$id + "/country"
+                },
+                data: {
+                    type: "country",
+                    id: organization.seatCountry.$id
+                }
+            };
+        }
+    }
 
     return jsonapi;
 }
